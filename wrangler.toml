@@ -1,0 +1,21 @@
+name = "1db-io"
+main = "src/index.ts"
+compatibility_date = "2026-05-12"
+workers_dev = true
+routes = [
+  { pattern = "1db.io/*", zone_name = "1db.io" }
+]
+
+[vars]
+ENVIRONMENT = "production"
+PUBLIC_ORIGIN = "https://1db.io"
+NODE_VERTEX_ORIGIN = "https://nodevertex.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "1db-control"
+database_id = "1c08d7a4-8d54-42ad-a39e-9771fb6d6d4b"
+
+[[kv_namespaces]]
+binding = "ALIAS_CACHE"
+id = "8a4d73c4b70148589db40cda5281c182"
