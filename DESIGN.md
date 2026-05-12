@@ -1,7 +1,7 @@
 # 1db.io Design System
 
-Vertical: programmable security and routing edge for Node Vertex. The interface should feel compact, precise, and operational rather than like a generic SaaS shortener.
+Vertical: programmable edge links, policy-aware short URLs, QR-friendly routing, and analytics for teams and platforms. 1db is its own service; tenants can connect their own apps and destinations without the public site naming any one tenant.
 
-Visual essence: dark graphite shell, electric vertex cyan, warm success green, compact monospace URL chips, card surfaces with subtle grid/edge lines. Layout favors dense control-plane clarity with strong hero messaging.
+Visual essence: Cloudflare-inspired infrastructure clarity with a distinct blue/teal palette. Use dark navy backgrounds, luminous teal/blue gradients, crisp rounded cards, compact URL chips, and operational copy that feels fast, secure, and developer-friendly.
 
-Structural bones: homepage explains positioning, admin dashboard renders from API state, docs are API-first, alias detail includes policy and analytics. Every control has pending/error/success states.
+Structural bones: homepage explains standalone positioning, pricing compares favorably with short-link SaaS and edge platforms, admin renders from API state, docs are API-first, alias detail includes policy and analytics. Every control has pending/error/success states.

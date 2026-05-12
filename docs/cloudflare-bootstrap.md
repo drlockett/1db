@@ -41,7 +41,7 @@ Required token permission to finish root-domain route:
 - Remote D1 migrations applied.
 - Live Worker endpoint health/home/admin/docs passed.
 - Live Worker API created `/a/x3`.
-- Live Worker `/a/x3?hello=world` redirects to `https://nodevertex.com/nrun/apps/firestorm?hello=world`.
+- Live Worker alias redirect behavior was verified with query-string preservation.
 - Live Worker JSON negotiation for `/a/x3` returns metadata.
 - Analytics endpoint contains redirect events.
 
