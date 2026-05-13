@@ -18,3 +18,7 @@ database_id = "1c08d7a4-8d54-42ad-a39e-9771fb6d6d4b"
 [[kv_namespaces]]
 binding = "ALIAS_CACHE"
 id = "8a4d73c4b70148589db40cda5281c182"
+
+[[send_email]]
+name = "WAITLIST_EMAIL"
+destination_address = "dr.lockett@hotmail.com"
