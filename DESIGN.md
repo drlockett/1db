@@ -1,7 +1,27 @@
 # 1db.io Design System
 
-Vertical: programmable edge links, policy-aware short URLs, QR-friendly routing, and analytics for teams and platforms. 1db is its own service; tenants can connect their own apps and destinations without the public site naming any one tenant.
+## Product category
 
-Visual essence: Cloudflare-inspired infrastructure clarity with a mostly light palette. Use white and pale-blue surfaces, navy text, soft grid textures, blue primary actions, teal status/accent details, crisp rounded cards, compact URL chips, and operational copy that feels fast, secure, and developer-friendly.
+1db is the distributed intelligence database for agents, applications, humans, and machines. It is not a URL shortener, database clone, or Node Vertex utility. Node Vertex is the distributed communication fabric; 1db is the distributed intelligence layer that stores meaning, relationships, memory, embeddings, events, identity, and live semantic context.
 
-Structural bones: homepage explains standalone positioning, pricing compares favorably with short-link SaaS and edge platforms, admin renders from API state, docs are API-first, alias detail includes policy and analytics. Every control has pending/error/success states.
+## Emotional target
+
+The interface should feel like next-generation infrastructure for the AI era: dark, precise, powerful, inevitable, and architectural. It should create the feeling of a living knowledge system, not a developer toy.
+
+## Visual essence
+
+Use a dark futuristic infrastructure language: black/deep navy voids, cyan/teal intelligence glow, violet depth accents, glass panels, subtle grid fields, moving scanlines, realtime streams, graph nodes, semantic trails, and elegant technical typography. Avoid stock illustrations, cartoons, or generic SaaS utility patterns.
+
+## Structural bones
+
+- Hero: The Distributed Intelligence Database.
+- What is 1db: distributed intelligence datastore and semantic memory layer.
+- Why now: traditional databases store rows; agents need meaning.
+- Architecture: Node Vertex moves information, 1db understands it.
+- Live memory demo: agents sharing context in realtime.
+- Use cases: multi-agent company, digital human memory, autonomous infrastructure, realtime AI collaboration.
+- Vision: the future internet is intelligence-based.
+
+## Interaction grammar
+
+Motion should imply cognition: graph pulses, semantic trails, animated memory streams, subtle scanlines, and glassy depth. Motion should be ambient and purposeful, not gimmicky.
