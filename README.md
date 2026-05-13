@@ -59,4 +59,4 @@ export ONE_DB_API_KEY=1db_live_...
 ./cli/1db links create --code demo --url https://example.com
 ```
 
-Homebrew tap scaffold is included at `homebrew/Formula/1db.rb` for `drlockett/1db/1db`.
+A validated local Homebrew tap is available at `/Users/nr-admin/homebrew-1db`. It maps to `brew tap drlockett/1db` and supports `brew install drlockett/1db/1db` through `Aliases/1db` -> `Formula/one-db.rb`.
