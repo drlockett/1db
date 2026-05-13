@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+const API=process.env.ONE_DB_API_URL||process.env.DB_API_URL||'https://1db.io';
+const KEY=process.env.ONE_DB_API_KEY||process.env.DB_API_KEY||process.env['1DB_API_KEY'];
+const args=process.argv.slice(2);
+function usage(){console.log(`1db CLI\n\nUsage:\n  1db links create --code demo --url https://example.com\n  1db links list\n  1db intakes create --slug waitlist --name Waitlist\n\nEnv:\n  ONE_DB_API_KEY=1db_live_...\n  ONE_DB_API_URL=https://1db.io`)}
+function opt(n){const i=args.indexOf(n);return i>=0?args[i+1]:undefined}
+async function call(path,method='GET',body){if(!KEY){console.error('Missing ONE_DB_API_KEY');process.exit(2)} const r=await fetch(API+path,{method,headers:{authorization:`Bearer ${KEY}`,'content-type':'application/json'},body:body?JSON.stringify(body):undefined}); const j=await r.json().catch(()=>({})); if(!r.ok){console.error(JSON.stringify(j,null,2));process.exit(1)} console.log(JSON.stringify(j,null,2))}
+(async()=>{if(args.length===0||args.includes('--help'))return usage(); if(args[0]==='links'&&args[1]==='create')return call('/api/v1/links','POST',{code:opt('--code'),destinationUrl:opt('--url')||opt('--destination-url'),tags:(opt('--tags')||'').split(',').filter(Boolean)}); if(args[0]==='links'&&args[1]==='list')return call('/api/v1/links'); if(args[0]==='intakes'&&args[1]==='create')return call('/api/v1/intakes','POST',{slug:opt('--slug'),name:opt('--name')||opt('--slug')}); usage();})();
