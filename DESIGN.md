@@ -4,24 +4,29 @@
 
 1db is the distributed intelligence database for agents, applications, humans, and machines. It is not a URL shortener, database clone, or Node Vertex utility. Node Vertex is the distributed communication fabric; 1db is the distributed intelligence layer that stores meaning, relationships, memory, embeddings, events, identity, and live semantic context.
 
-## Emotional target
+## Visual direction
 
-The interface should feel like next-generation infrastructure for the AI era: dark, precise, powerful, inevitable, and architectural. It should create the feeling of a living knowledge system, not a developer toy.
+The site should look closer to Cloudflare than to a dark cyberpunk product: mostly light, white and pale blue surfaces, crisp infrastructure cards, subtle grid backgrounds, soft shadows, and restrained blue/green accents. It should feel enterprise-grade, technical, clean, and inevitable.
 
-## Visual essence
+## Palette
 
-Use a dark futuristic infrastructure language: black/deep navy voids, cyan/teal intelligence glow, violet depth accents, glass panels, subtle grid fields, moving scanlines, realtime streams, graph nodes, semantic trails, and elegant technical typography. Avoid stock illustrations, cartoons, or generic SaaS utility patterns.
+- White and pale blue page surfaces
+- Deep navy text
+- Cloud infrastructure blue for primary actions
+- Green/teal accents for intelligence, sync, and live state
+- Thin pale borders and glassy cards
 
 ## Structural bones
 
 - Hero: The Distributed Intelligence Database.
+- Visual: clean graph architecture panel, not a dark sci-fi scene.
 - What is 1db: distributed intelligence datastore and semantic memory layer.
+- The shift: rows to relations to recall.
 - Why now: traditional databases store rows; agents need meaning.
 - Architecture: Node Vertex moves information, 1db understands it.
 - Live memory demo: agents sharing context in realtime.
 - Use cases: multi-agent company, digital human memory, autonomous infrastructure, realtime AI collaboration.
-- Vision: the future internet is intelligence-based.
 
 ## Interaction grammar
 
-Motion should imply cognition: graph pulses, semantic trails, animated memory streams, subtle scanlines, and glassy depth. Motion should be ambient and purposeful, not gimmicky.
+Motion should be subtle and infrastructure-like: graph pulses, soft data trails, animated sync bars, and technical diagrams. Avoid heavy neon, cyberpunk darkness, stock art, or toy-like illustrations.
