@@ -2,31 +2,25 @@
 
 ## Product category
 
-1db is the distributed intelligence database for agents, applications, humans, and machines. It is not a URL shortener, database clone, or Node Vertex utility. Node Vertex is the distributed communication fabric; 1db is the distributed intelligence layer that stores meaning, relationships, memory, embeddings, events, identity, and live semantic context.
+1db is the cognitive infrastructure layer for persistent intelligence. It is not a vector database, graph database, RAG backend, URL shortener, or Node Vertex utility. Node Vertex is the distributed communication fabric; 1db is the semantic persistence substrate for machine memory, temporal intelligence, identity continuity, relationship awareness, simulation, and distributed cognition.
 
 ## Visual direction
 
-The site should look closer to Cloudflare than to a dark cyberpunk product: mostly light, white and pale blue surfaces, crisp infrastructure cards, subtle grid backgrounds, soft shadows, and restrained blue/green accents. It should feel enterprise-grade, technical, clean, and inevitable.
+The site should keep a Cloudflare-like light infrastructure style: mostly white and pale-blue surfaces, crisp cards, subtle grid backgrounds, navy type, soft shadows, and restrained blue/green accents. The visuals should imply flowing cognition, memory structures, timeline evolution, and relational intelligence without becoming dark cyberpunk or generic SaaS.
 
-## Palette
+## Core narrative
 
-- White and pale blue page surfaces
-- Deep navy text
-- Cloud infrastructure blue for primary actions
-- Green/teal accents for intelligence, sync, and live state
-- Thin pale borders and glassy cards
+Intelligence without continuity is not intelligence. LLMs can generate responses, but without persistent cognition they forget, reset, lose identity, lose relationships, cannot evolve, cannot maintain goals, and cannot preserve behavioral patterns. 1db introduces a continuously evolving intelligence graph.
 
-## Structural bones
+## Signature concepts
 
-- Hero: The Distributed Intelligence Database.
-- Visual: clean graph architecture panel, not a dark sci-fi scene.
-- What is 1db: distributed intelligence datastore and semantic memory layer.
-- The shift: rows to relations to recall.
-- Why now: traditional databases store rows; agents need meaning.
-- Architecture: Node Vertex moves information, 1db understands it.
-- Live memory demo: agents sharing context in realtime.
-- Use cases: multi-agent company, digital human memory, autonomous infrastructure, realtime AI collaboration.
+- Human-like memory model: working, episodic, semantic, relationship, identity, temporal, and predictive/simulation memory.
+- Time as first-class infrastructure: chronology, causality, relevance, evolution, reinforcement, and decay.
+- Memory decay and reinforcement: confidence, contradiction resolution, semantic strengthening, contextual prioritization, importance weighting, merging, and aging.
+- Persona Continuity Score™ as an infrastructure primitive for consistency across time.
+- Simulation and future reasoning: projected futures, branches, outcomes, and retained reasoning paths.
+- Shared organizational cognition: institutional memory across humans, agents, apps, workflows, and infrastructure.
 
 ## Interaction grammar
 
-Motion should be subtle and infrastructure-like: graph pulses, soft data trails, animated sync bars, and technical diagrams. Avoid heavy neon, cyberpunk darkness, stock art, or toy-like illustrations.
+Motion should be subtle and infrastructure-like: graph pulses, soft data trails, animated sync bars, and technical diagrams. Avoid heavy neon, database cylinders, cubes, stock art, dashboards, or toy-like illustrations.
