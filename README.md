@@ -81,3 +81,11 @@ npm run test:cognition
 ```
 
 The MVP uses Cloudflare D1 tables for append-only events, memory atoms, evidence, entities, graph edges, continuity states, and lexical embedding metadata. Vector-provider integration, contradiction handling, consolidation, decay jobs, and governance UI are next-phase work.
+
+### Cognitive integrity Phase 2
+
+Phase 2 adds duplicate candidate links, reinforcement events, contradiction reports, reinforcement-aware ranking, stale/low-confidence warning hooks, and graph relationship context.
+
+```bash
+npm run test:cognition:phase2
+```
