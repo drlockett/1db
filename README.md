@@ -60,3 +60,24 @@ export ONE_DB_API_KEY=1db_live_...
 ```
 
 A validated local Homebrew tap is available at `/Users/nr-admin/homebrew-1db`. It maps to `brew tap drlockett/1db` and supports `brew install drlockett/1db/1db` through `Aliases/1db` -> `Formula/one-db.rb`.
+
+## Cognitive persistence MVP
+
+Phase 1 project continuity endpoints:
+
+```bash
+POST  /api/v1/cognition/events
+POST  /api/v1/cognition/context/retrieve
+GET   /api/v1/cognition/projects/{projectId}/continuity
+GET   /api/v1/cognition/memories/{memoryId}/explain
+PATCH /api/v1/cognition/memories/{memoryId}/correct
+PATCH /api/v1/cognition/memories/{memoryId}/deprecate
+```
+
+Run the live integration scenario:
+
+```bash
+npm run test:cognition
+```
+
+The MVP uses Cloudflare D1 tables for append-only events, memory atoms, evidence, entities, graph edges, continuity states, and lexical embedding metadata. Vector-provider integration, contradiction handling, consolidation, decay jobs, and governance UI are next-phase work.
