@@ -17,7 +17,7 @@ Intelligence without continuity is not intelligence. LLMs can generate responses
 - Human-like memory model: working, episodic, semantic, relationship, identity, temporal, and predictive/simulation memory.
 - Time as first-class infrastructure: chronology, causality, relevance, evolution, reinforcement, and decay.
 - Memory decay and reinforcement: confidence, contradiction resolution, semantic strengthening, contextual prioritization, importance weighting, merging, and aging.
-- Persona Continuity Score™ as an infrastructure primitive for consistency across time.
+- Persona Continuity Score as an infrastructure primitive for consistency across time.
 - Simulation and future reasoning: projected futures, branches, outcomes, and retained reasoning paths.
 - Shared organizational cognition: institutional memory across humans, agents, apps, workflows, and infrastructure.
 
