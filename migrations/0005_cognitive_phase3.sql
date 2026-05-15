@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS agent_continuity_states(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,agent_id TEXT NOT NULL,role TEXT,status TEXT NOT NULL DEFAULT 'STANDBY',state TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_agent_continuity_unique ON agent_continuity_states(tenant_id,agent_id);
+CREATE TABLE IF NOT EXISTS user_continuity_states(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,user_id TEXT NOT NULL,state TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_continuity_unique ON user_continuity_states(tenant_id,user_id);
+CREATE TABLE IF NOT EXISTS workflow_continuity_states(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,workflow_id TEXT NOT NULL,project_id TEXT,status TEXT NOT NULL DEFAULT 'active',state TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_continuity_unique ON workflow_continuity_states(tenant_id,workflow_id);
+CREATE TABLE IF NOT EXISTS agent_commitments(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,agent_id TEXT NOT NULL,project_id TEXT,workflow_id TEXT,commitment TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'active',due_at TEXT,evidence_event_id TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_agent_commitments_agent ON agent_commitments(tenant_id,agent_id,status);
+CREATE TABLE IF NOT EXISTS memory_handoffs(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,from_agent_id TEXT NOT NULL,to_agent_id TEXT NOT NULL,project_id TEXT,memory_ids TEXT NOT NULL,context_summary TEXT,status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,accepted_at TEXT);
+CREATE INDEX IF NOT EXISTS idx_memory_handoffs_to ON memory_handoffs(tenant_id,to_agent_id,status);
+CREATE TABLE IF NOT EXISTS cognitive_snapshots(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL,scope_type TEXT NOT NULL,scope_id TEXT NOT NULL,summary TEXT,state TEXT NOT NULL,source_event_ids TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_cognitive_snapshots_scope ON cognitive_snapshots(tenant_id,scope_type,scope_id,created_at DESC);
