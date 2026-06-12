@@ -23,6 +23,7 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 - TALA image: `nrun/tala.nrun.ws:k8s-onedb-20260612-001048`
 - Kubernetes ingress: `one-db`, Traefik class, TLS secret `one-db-tls`
 - Origin certificate: Let's Encrypt for `1db.io` and `www.1db.io`, expires `2026-09-10`
+- Origin certificate renewal: `/opt/nrun-certs/1db.io/renew-and-sync.sh` on `seca`, scheduled daily at `03:17`
 - Cloudflare DNS: apex proxied A record to `108.181.221.199`; `www` proxied CNAME to apex
 - Cloudflare routing: legacy Worker route `1db.io/* -> 1db-io` removed for public cutover
 - Cloudflare SSL mode: `strict`; Always Use HTTPS: `on`
