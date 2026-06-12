@@ -252,14 +252,39 @@ BEGIN
         TenantId BIGINT NULL,
         BackendRole NVARCHAR(64) NOT NULL,
         ProviderKey NVARCHAR(96) NOT NULL,
+        ProviderType NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_StoreBackends_ProviderType DEFAULT N'unknown',
         IsEnabled BIT NOT NULL CONSTRAINT DF_OneDb_StoreBackends_IsEnabled DEFAULT 1,
         Priority INT NOT NULL CONSTRAINT DF_OneDb_StoreBackends_Priority DEFAULT 100,
         ConfigJson NVARCHAR(MAX) NULL,
+        CapabilitiesJson NVARCHAR(MAX) NULL,
+        HealthStatus NVARCHAR(32) NOT NULL CONSTRAINT DF_OneDb_StoreBackends_HealthStatus DEFAULT N'unknown',
+        LastHealthCheckUtc DATETIME2(3) NULL,
+        Notes NVARCHAR(1000) NULL,
         CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_StoreBackends_CreatedUtc DEFAULT SYSUTCDATETIME(),
         UpdatedUtc DATETIME2(3) NULL,
         CONSTRAINT FK_OneDb_StoreBackends_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id)
     );
 END;
+GO
+
+IF COL_LENGTH(N'onedb.StoreBackends', N'ProviderType') IS NULL
+    ALTER TABLE onedb.StoreBackends ADD ProviderType NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_StoreBackends_ProviderType DEFAULT N'unknown';
+GO
+
+IF COL_LENGTH(N'onedb.StoreBackends', N'CapabilitiesJson') IS NULL
+    ALTER TABLE onedb.StoreBackends ADD CapabilitiesJson NVARCHAR(MAX) NULL;
+GO
+
+IF COL_LENGTH(N'onedb.StoreBackends', N'HealthStatus') IS NULL
+    ALTER TABLE onedb.StoreBackends ADD HealthStatus NVARCHAR(32) NOT NULL CONSTRAINT DF_OneDb_StoreBackends_HealthStatus DEFAULT N'unknown';
+GO
+
+IF COL_LENGTH(N'onedb.StoreBackends', N'LastHealthCheckUtc') IS NULL
+    ALTER TABLE onedb.StoreBackends ADD LastHealthCheckUtc DATETIME2(3) NULL;
+GO
+
+IF COL_LENGTH(N'onedb.StoreBackends', N'Notes') IS NULL
+    ALTER TABLE onedb.StoreBackends ADD Notes NVARCHAR(1000) NULL;
 GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.StoreBackends') AND name = N'IX_OneDb_StoreBackends_Role')
@@ -269,21 +294,40 @@ GO
 MERGE onedb.StoreBackends AS target
 USING
 (
-    SELECT CAST(NULL AS BIGINT) AS TenantId, N'control-sql' AS BackendRole, N'sqlserver-nrun' AS ProviderKey, 10 AS Priority
-    UNION ALL SELECT NULL, N'event-object', N'pending-object-store', 100
-    UNION ALL SELECT NULL, N'vector', N'pending-vector-store', 100
-    UNION ALL SELECT NULL, N'graph', N'sqlserver-edge-table', 50
-    UNION ALL SELECT NULL, N'search', N'sqlserver-lexical', 50
-    UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', 50
+    SELECT CAST(NULL AS BIGINT) AS TenantId, N'control-sql' AS BackendRole, N'sqlserver-nrun' AS ProviderKey, N'sqlserver' AS ProviderType, 10 AS Priority, N'operational' AS HealthStatus,
+           N'{"operations":["tenant-governance","event-ledger","memory-ledger","continuity","context-packets"],"read":true,"write":true}' AS CapabilitiesJson,
+           N'Canonical 1db control ledger in SQL Server Nrun.' AS Notes
+    UNION ALL SELECT NULL, N'document', N'mongodb-planned', N'mongodb', 40, N'planned',
+           N'{"operations":["payload-documents","memory-documents","context-packet-documents","session-snapshots"],"read":true,"write":true}',
+           N'Planned flexible document backend for rich cognition payloads and packets.'
+    UNION ALL SELECT NULL, N'event-object', N'pending-object-store', N'object-store', 100, N'planned',
+           N'{"operations":["raw-events","transcripts","large-artifacts","exports"],"read":true,"write":true}',
+           N'Planned object/N2/R2-compatible event artifact store.'
+    UNION ALL SELECT NULL, N'vector', N'pending-vector-store', N'vector-db', 100, N'planned',
+           N'{"operations":["embedding-write","semantic-recall","nearest-neighbor"],"read":true,"write":true}',
+           N'Planned vector retrieval provider.'
+    UNION ALL SELECT NULL, N'graph', N'sqlserver-edge-table', N'sqlserver', 50, N'operational',
+           N'{"operations":["relationship-ledger","graph-neighborhood","causality"],"read":true,"write":true}',
+           N'Initial graph role backed by SQL Server edge tables.'
+    UNION ALL SELECT NULL, N'search', N'sqlserver-lexical', N'sqlserver', 50, N'operational',
+           N'{"operations":["lexical-recall","bm25-planned","hybrid-recall-planned"],"read":true,"write":false}',
+           N'Initial lexical retrieval over SQL Server memory text.'
+    UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', N'redis', 50, N'planned',
+           N'{"operations":["active-context-cache","queue-locks","short-lived-packets"],"read":true,"write":true}',
+           N'VELO/Redis cache role for hot cognition paths.'
+    UNION ALL SELECT NULL, N'notebook', N'jupyter-planned', N'jupyter', 200, N'planned',
+           N'{"operations":["memory-quality-analysis","embedding-evaluation","consolidation-research","drift-analysis"],"read":true,"write":false}',
+           N'Planned research and operations workbench; not a serving path.'
 ) AS source
    ON ((target.TenantId IS NULL AND source.TenantId IS NULL) OR target.TenantId = source.TenantId)
   AND target.BackendRole = source.BackendRole
   AND target.ProviderKey = source.ProviderKey
 WHEN MATCHED THEN
-    UPDATE SET IsEnabled = 1, Priority = source.Priority, UpdatedUtc = SYSUTCDATETIME()
+    UPDATE SET IsEnabled = 1, ProviderType = source.ProviderType, Priority = source.Priority, CapabilitiesJson = source.CapabilitiesJson,
+               HealthStatus = source.HealthStatus, Notes = source.Notes, UpdatedUtc = SYSUTCDATETIME()
 WHEN NOT MATCHED THEN
-    INSERT (TenantId, BackendRole, ProviderKey, IsEnabled, Priority, CreatedUtc)
-    VALUES (source.TenantId, source.BackendRole, source.ProviderKey, 1, source.Priority, SYSUTCDATETIME());
+    INSERT (TenantId, BackendRole, ProviderKey, ProviderType, IsEnabled, Priority, CapabilitiesJson, HealthStatus, Notes, CreatedUtc)
+    VALUES (source.TenantId, source.BackendRole, source.ProviderKey, source.ProviderType, 1, source.Priority, source.CapabilitiesJson, source.HealthStatus, source.Notes, SYSUTCDATETIME());
 GO
 
 SELECT Id, Code, Name, BaseUrl, IsActive

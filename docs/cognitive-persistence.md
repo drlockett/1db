@@ -12,6 +12,7 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 - `POST /api/v1/cognition/context/retrieve`
 - `GET /api/v1/cognition/context/packets/{packetUid}`
 - `GET /api/v1/cognition/backends`
+- `GET /api/v1/cognition/backends/plan`
 - `GET /api/v1/cognition/projects/{projectId}/continuity`
 - `GET /api/v1/cognition/memories/{memoryId}/explain`
 - `PATCH /api/v1/cognition/memories/{memoryId}/correct`
@@ -28,7 +29,7 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 
 ## NodeRunner phase 2 additions
 
-The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see the daTALAke roles available beyond SQL Server.
+The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see and route across daTALAke roles beyond SQL Server, including planned MongoDB document and Jupyter notebook providers.
 
 ## Phase 2 cognitive integrity additions
 

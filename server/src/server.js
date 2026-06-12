@@ -197,6 +197,7 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/context/retrieve',
           '/api/v1/cognition/context/packets/{packetUid}',
           '/api/v1/cognition/backends',
+          '/api/v1/cognition/backends/plan',
           '/api/v1/cognition/projects/{projectId}/continuity'
         ]
       });

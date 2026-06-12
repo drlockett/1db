@@ -7,11 +7,13 @@
 | Backend role | Purpose | Initial state |
 | --- | --- | --- |
 | `control-sql` | Tenant-scoped metadata, governance, continuity summaries, jobs, audit, provider registry | SQL Server `Nrun`, schema `onedb` |
+| `document` | Memory documents, conversational artifacts, embeddings source records, flexible cognition documents | MongoDB planned |
 | `event-object` | Append-only raw events, transcripts, payload snapshots, large source artifacts | Future object/N2/R2-compatible store |
 | `vector` | Embeddings and nearest-neighbor recall | Future pgvector/Qdrant/other provider |
 | `graph` | Entity, relationship, causality, identity, temporal links | SQL edge table first, graph provider later |
 | `search` | Lexical/BM25/hybrid recall | SQL lexical first, dedicated index later |
 | `hot-cache` | Active context, queue locks, short-lived retrieval/cache packets | VELO/Redis |
+| `notebook` | Research, diagnostics, data science, and consolidation notebooks over lake state | Jupyter planned |
 
 ## TALA Provider Boundary
 
@@ -37,7 +39,13 @@ The live NodeRunner path exposes the effective catalog through:
 GET /api/v1/cognition/backends
 ```
 
-The initial catalog contains `control-sql`, `event-object`, `vector`, `graph`, `search`, and `hot-cache` roles.
+The live route planner exposes how operations map onto those providers:
+
+```text
+GET /api/v1/cognition/backends/plan?operation=retrieve
+```
+
+The initial catalog contains `control-sql`, `document`, `event-object`, `vector`, `graph`, `search`, `hot-cache`, and `notebook` roles.
 
 ## Retrieval Shape
 
