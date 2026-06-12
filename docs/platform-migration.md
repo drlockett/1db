@@ -14,6 +14,21 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 - `server/src/server.js`: Kubernetes-ready Node service that exposes public health/readiness, platform manifest, and SAPI-backed cognition proxy routes.
 - `Dockerfile`: builds the Kubernetes runtime image as `nrun/1db:<immutable-tag>`.
 
+## Deployed State: 2026-06-12
+
+- Namespace: `nrun-platform`
+- Public hosts: `https://1db.io`, `https://www.1db.io`
+- 1db image: `nrun/1db:k8s-20260612-public1`
+- SAPI image: `nrun/sapi.nrun.ws:k8s-onedb-20260612-001048-sapi2`
+- TALA image: `nrun/tala.nrun.ws:k8s-onedb-20260612-001048`
+- Kubernetes ingress: `one-db`, Traefik class, TLS secret `one-db-tls`
+- Origin certificate: Let's Encrypt for `1db.io` and `www.1db.io`, expires `2026-09-10`
+- Cloudflare DNS: apex proxied A record to `108.181.221.199`; `www` proxied CNAME to apex
+- Cloudflare routing: legacy Worker route `1db.io/* -> 1db-io` removed for public cutover
+- Cloudflare SSL mode: `strict`; Always Use HTTPS: `on`
+
+Public smoke checks passed for `/`, `/health`, `/ready`, `/api/v1/platform/manifest`, `POST /api/v1/cognition/events`, and `POST /api/v1/cognition/context/retrieve`.
+
 ## Canonical API Path
 
 External callers use:
