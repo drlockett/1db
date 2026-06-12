@@ -7,15 +7,32 @@ const sapiBase = (process.env.SAPI_BASE_URL || 'https://sapi.nrun.ws/v1').replac
 const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVICE_TOKEN || '';
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 
-const cors = {
-  'access-control-allow-origin': publicOrigin,
-  'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS',
-  'access-control-allow-headers': 'content-type,authorization,x-api-key,x-nrun-tenant-uid,x-1db-tenant-uid,idempotency-key',
-  'access-control-allow-credentials': 'true'
+const allowedOrigins = new Set([
+  publicOrigin,
+  'https://1db.io',
+  'https://www.1db.io'
+]);
+
+function corsFor(req) {
+  const origin = req.headers.origin;
+  const allowOrigin = allowedOrigins.has(origin) ? origin : publicOrigin;
+  return {
+    'access-control-allow-origin': allowOrigin,
+    'vary': 'Origin',
+    'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS,HEAD',
+    'access-control-allow-headers': 'content-type,authorization,x-api-key,x-nrun-tenant-uid,x-1db-tenant-uid,idempotency-key',
+    'access-control-allow-credentials': 'true'
+  };
+}
+
+const securityHeaders = {
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'geolocation=(), microphone=(), camera=()'
 };
 
 function send(res, status, body, headers = {}) {
-  res.writeHead(status, headers);
+  res.writeHead(status, { ...securityHeaders, ...headers });
   res.end(body);
 }
 
@@ -23,7 +40,7 @@ function json(res, status, data, headers = {}) {
   send(res, status, JSON.stringify(data, null, 2), {
     'content-type': 'application/json; charset=utf-8',
     'cache-control': 'no-store',
-    ...cors,
+    ...corsFor(res.req),
     ...headers
   });
 }
@@ -159,8 +176,10 @@ function home(res) {
 
 const server = createServer(async (req, res) => {
   try {
+    res.req = req;
     const url = new URL(req.url || '/', publicOrigin);
-    if (req.method === 'OPTIONS') return send(res, 204, '', cors);
+    if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
+    if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return home(res);
     if (url.pathname === '/health') return json(res, 200, { ok: true, service: '1db.io', mode: 'sapi-tala', time: new Date().toISOString() });
     if (url.pathname === '/ready') {
