@@ -1,5 +1,14 @@
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import {
+  docsPage,
+  homePage,
+  notFoundPage,
+  openApiDocument,
+  signInPage,
+  waitlistPage,
+  waitlistThanksPage
+} from './pages.js';
 
 const port = Number(process.env.PORT || 8080);
 const publicOrigin = process.env.PUBLIC_ORIGIN || 'https://1db.io';
@@ -50,6 +59,11 @@ function html(res, status, body) {
     'content-type': 'text/html; charset=utf-8',
     'cache-control': 'no-store'
   });
+}
+
+function parseForm(text) {
+  const params = new URLSearchParams(text || '');
+  return Object.fromEntries(params.entries());
 }
 
 function cleanPath(value) {
@@ -137,55 +151,31 @@ async function proxyCognition(req, res, url, parts) {
   return json(res, result.status, result.data ?? {});
 }
 
-function home(res) {
-  html(res, 200, `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>1db.io</title>
-  <style>
-    :root{color-scheme:light;--ink:#102033;--muted:#5c6b7c;--line:#d9e5ef;--blue:#1d74d8;--green:#25a06a}
-    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7fbff}
-    main{max-width:1120px;margin:0 auto;padding:72px 24px}
-    .brand{font-weight:800;letter-spacing:.04em;color:#0e5599;text-transform:uppercase;font-size:13px}
-    h1{font-size:clamp(42px,8vw,86px);line-height:.96;margin:18px 0 22px;letter-spacing:0}
-    p{font-size:20px;line-height:1.55;color:var(--muted);max-width:760px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:44px}
-    article{background:white;border:1px solid var(--line);border-radius:8px;padding:22px}
-    h2{font-size:18px;margin:0 0 8px}
-    article p{font-size:15px;margin:0}
-    code{background:#e9f2fb;border:1px solid var(--line);border-radius:6px;padding:2px 6px}
-  </style>
-</head>
-<body>
-  <main>
-    <div class="brand">1db.io</div>
-    <h1>Cognitive infrastructure for persistent intelligence.</h1>
-    <p>1db is moving into the NodeRunner platform as the memory and cognition service backed by SAPI, TALA, and the daTALAke. Context should become durable state, not a disposable prompt artifact.</p>
-    <section class="grid">
-      <article><h2>Runtime</h2><p>Kubernetes service with health checks, immutable images, and SAPI-first API proxying.</p></article>
-      <article><h2>Persistence</h2><p>TALA owns canonical memory events, atoms, evidence, continuity state, and retrieval packets.</p></article>
-      <article><h2>Lake</h2><p>SQL Server anchors governance while vector, graph, object, search, and cache backends can be added behind provider boundaries.</p></article>
-      <article><h2>API</h2><p>Use <code>/api/v1/cognition/*</code> with a canonical NodeRunner tenant UID.</p></article>
-    </section>
-  </main>
-</body>
-</html>`);
-}
-
 const server = createServer(async (req, res) => {
   try {
     res.req = req;
     const url = new URL(req.url || '/', publicOrigin);
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
-    if (url.pathname === '/' && req.method === 'GET') return home(res);
+    if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
+    if (url.pathname === '/docs' && req.method === 'GET') return html(res, 200, docsPage());
+    if (url.pathname === '/signin' && req.method === 'GET') return html(res, 200, signInPage());
+    if (url.pathname === '/waitlist' && req.method === 'GET') return html(res, 200, waitlistPage());
+    if (url.pathname === '/waitlist' && req.method === 'POST') {
+      const { text } = await readBody(req);
+      const form = parseForm(text);
+      if (form.website) return html(res, 200, waitlistThanksPage());
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(form.email || '').trim())) {
+        return html(res, 400, waitlistPage('Enter a valid email.'));
+      }
+      return html(res, 202, waitlistThanksPage());
+    }
     if (url.pathname === '/health') return json(res, 200, { ok: true, service: '1db.io', mode: 'sapi-tala', time: new Date().toISOString() });
     if (url.pathname === '/ready') {
       const result = await sapi('/health', { timeoutMs: 5000 });
       return json(res, result.ok ? 200 : 503, { ok: result.ok, sapiStatus: result.status, service: '1db.io' });
     }
+    if (url.pathname === '/openapi.json' && req.method === 'GET') return json(res, 200, openApiDocument(publicOrigin));
     if (url.pathname === '/api/v1/platform/manifest') {
       return json(res, 200, {
         applicationKey: appKey,
@@ -206,6 +196,7 @@ const server = createServer(async (req, res) => {
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cognition') {
       return proxyCognition(req, res, url, parts.slice(3));
     }
+    if (req.method === 'GET' && !url.pathname.startsWith('/api/')) return html(res, 404, notFoundPage());
     return json(res, 404, { error: { code: 'not_found', message: 'No route matched.' } });
   } catch (error) {
     return json(res, 500, { error: { code: 'server_error', message: error?.message || 'Unhandled 1db server error.' } });
