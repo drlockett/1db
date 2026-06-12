@@ -10,6 +10,8 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 
 - `POST /api/v1/cognition/events`
 - `POST /api/v1/cognition/context/retrieve`
+- `GET /api/v1/cognition/context/packets/{packetUid}`
+- `GET /api/v1/cognition/backends`
 - `GET /api/v1/cognition/projects/{projectId}/continuity`
 - `GET /api/v1/cognition/memories/{memoryId}/explain`
 - `PATCH /api/v1/cognition/memories/{memoryId}/correct`
@@ -23,6 +25,10 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 - Uses lexical semantic indexing in `memory_embeddings.embedding_json`; vector provider integration is Phase 2+.
 - Extraction is rule-based and conservative.
 - Graph expansion is stored but retrieval graph-neighborhood assembly is minimal in Phase 1.
+
+## NodeRunner phase 2 additions
+
+The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see the daTALAke roles available beyond SQL Server.
 
 ## Phase 2 cognitive integrity additions
 

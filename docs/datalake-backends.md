@@ -31,6 +31,14 @@ RunConsolidation
 
 Provider selection should be metadata-driven through `onedb.StoreBackends`, not hard-coded in the app. A tenant can start fully on SQL Server and later graduate vector or graph workloads without changing the public 1db API.
 
+The live NodeRunner path exposes the effective catalog through:
+
+```text
+GET /api/v1/cognition/backends
+```
+
+The initial catalog contains `control-sql`, `event-object`, `vector`, `graph`, `search`, and `hot-cache` roles.
+
 ## Retrieval Shape
 
 Retrieval should combine:
@@ -44,3 +52,9 @@ Retrieval should combine:
 - Token-budget-aware context packet assembly
 
 The product promise is not that model context windows become infinite. The promise is that compaction becomes non-destructive because state can be reconstructed from durable cognition.
+
+Each `POST /api/v1/cognition/context/retrieve` call now writes an `onedb.ContextPackets` row containing the summary, continuity state, selected memories, backend plan, and token estimate. Callers can retrieve the packet again with:
+
+```text
+GET /api/v1/cognition/context/packets/{packetUid}
+```

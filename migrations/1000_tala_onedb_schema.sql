@@ -235,6 +235,14 @@ BEGIN
 END;
 GO
 
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ContextPackets') AND name = N'UX_OneDb_ContextPackets_PacketUid')
+    CREATE UNIQUE INDEX UX_OneDb_ContextPackets_PacketUid ON onedb.ContextPackets(PacketUid);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ContextPackets') AND name = N'IX_OneDb_ContextPackets_Tenant_Project')
+    CREATE INDEX IX_OneDb_ContextPackets_Tenant_Project ON onedb.ContextPackets(TenantId, ProjectId, CreatedUtc DESC);
+GO
+
 IF OBJECT_ID(N'onedb.StoreBackends', N'U') IS NULL
 BEGIN
     CREATE TABLE onedb.StoreBackends

@@ -18,9 +18,9 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 
 - Namespace: `nrun-platform`
 - Public hosts: `https://1db.io`, `https://www.1db.io`
-- 1db image: `nrun/1db:k8s-20260612-public1`
-- SAPI image: `nrun/sapi.nrun.ws:k8s-onedb-20260612-001048-sapi2`
-- TALA image: `nrun/tala.nrun.ws:k8s-onedb-20260612-001048`
+- 1db image: `nrun/1db:k8s-20260612-phase2-manifest`
+- SAPI image: `nrun/sapi.nrun.ws:k8s-onedb-phase2-20260612-004948`
+- TALA image: `nrun/tala.nrun.ws:k8s-onedb-phase2-20260612-004948`
 - Kubernetes ingress: `one-db`, Traefik class, TLS secret `one-db-tls`
 - Origin certificate: Let's Encrypt for `1db.io` and `www.1db.io`, expires `2026-09-10`
 - Origin certificate renewal: `/opt/nrun-certs/1db.io/renew-and-sync.sh` on `seca`, scheduled daily at `03:17`
@@ -28,7 +28,7 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 - Cloudflare routing: legacy Worker route `1db.io/* -> 1db-io` removed for public cutover
 - Cloudflare SSL mode: `strict`; Always Use HTTPS: `on`
 
-Public smoke checks passed for `/`, `/health`, `/ready`, `/api/v1/platform/manifest`, `POST /api/v1/cognition/events`, and `POST /api/v1/cognition/context/retrieve`.
+Public smoke checks passed for `/`, `/health`, `/ready`, `/api/v1/platform/manifest`, `POST /api/v1/cognition/events`, `POST /api/v1/cognition/context/retrieve`, `GET /api/v1/cognition/context/packets/{packetUid}`, and `GET /api/v1/cognition/backends`.
 
 ## Canonical API Path
 
@@ -37,6 +37,8 @@ External callers use:
 ```text
 POST /api/v1/cognition/events
 POST /api/v1/cognition/context/retrieve
+GET  /api/v1/cognition/context/packets/{packetUid}
+GET  /api/v1/cognition/backends
 GET  /api/v1/cognition/projects/{projectId}/continuity
 ```
 

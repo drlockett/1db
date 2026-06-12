@@ -192,7 +192,13 @@ const server = createServer(async (req, res) => {
         applicationName: '1db',
         storagePolicy: 'SAPI -> TALA -> daTALAke',
         canonicalTenantHeader: 'X-NRun-Tenant-Uid',
-        cognitiveRoutes: ['/api/v1/cognition/events', '/api/v1/cognition/context/retrieve', '/api/v1/cognition/projects/{projectId}/continuity']
+        cognitiveRoutes: [
+          '/api/v1/cognition/events',
+          '/api/v1/cognition/context/retrieve',
+          '/api/v1/cognition/context/packets/{packetUid}',
+          '/api/v1/cognition/backends',
+          '/api/v1/cognition/projects/{projectId}/continuity'
+        ]
       });
     }
     const parts = url.pathname.split('/').filter(Boolean);
