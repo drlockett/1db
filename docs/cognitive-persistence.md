@@ -23,13 +23,13 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 ## MVP limitations
 
 - Uses Cloudflare D1, not PostgreSQL/pgvector.
-- Uses lexical semantic indexing in `memory_embeddings.embedding_json`; vector provider integration is Phase 2+.
+- Uses SQL lexical recall plus the TALA-owned Qdrant provider path. Qdrant currently receives deterministic bootstrap vectors until the embedding worker phase replaces them with model embeddings.
 - Extraction is rule-based and conservative.
 - Graph expansion is stored but retrieval graph-neighborhood assembly is minimal in Phase 1.
 
 ## NodeRunner phase 2 additions
 
-The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see and route across daTALAke roles beyond SQL Server, including provisioned internal MongoDB document, Qdrant vector, Redis cache, and Jupyter notebook services.
+The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see and route across daTALAke roles beyond SQL Server, including operational internal MongoDB document, Qdrant vector, Redis cache, and Jupyter notebook services.
 
 ## Phase 2 cognitive integrity additions
 

@@ -299,13 +299,13 @@ USING
            N'Canonical 1db control ledger in SQL Server Nrun.' AS Notes
     UNION ALL SELECT NULL, N'document', N'onedb-mongo', N'mongodb', 40, N'provisioned',
            N'{"operations":["payload-documents","memory-documents","context-packet-documents","session-snapshots"],"read":true,"write":true,"service":"onedb-mongo.nrun-platform.svc.cluster.local:27017","secret":"onedb-mongo-secrets"}',
-           N'Kubernetes MongoDB document backend is provisioned; TALA provider client wiring is next.'
+           N'Kubernetes MongoDB document backend is provisioned; TALA provider client probes and document writes mark it operational when reachable.'
     UNION ALL SELECT NULL, N'event-object', N'pending-object-store', N'object-store', 100, N'planned',
            N'{"operations":["raw-events","transcripts","large-artifacts","exports"],"read":true,"write":true}',
            N'Planned object/N2/R2-compatible event artifact store.'
     UNION ALL SELECT NULL, N'vector', N'onedb-qdrant', N'qdrant', 100, N'provisioned',
            N'{"operations":["embedding-write","semantic-recall","nearest-neighbor"],"read":true,"write":true,"service":"onedb-qdrant.nrun-platform.svc.cluster.local:6333","secret":"onedb-qdrant-secrets"}',
-           N'Kubernetes Qdrant vector backend is provisioned; TALA provider client wiring is next.'
+           N'Kubernetes Qdrant vector backend is provisioned; TALA provider client probes and vector writes mark it operational when reachable.'
     UNION ALL SELECT NULL, N'graph', N'sqlserver-edge-table', N'sqlserver', 50, N'operational',
            N'{"operations":["relationship-ledger","graph-neighborhood","causality"],"read":true,"write":true}',
            N'Initial graph role backed by SQL Server edge tables.'
@@ -314,7 +314,7 @@ USING
            N'Initial lexical retrieval over SQL Server memory text.'
     UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', N'redis', 50, N'provisioned',
            N'{"operations":["active-context-cache","queue-locks","short-lived-packets"],"read":true,"write":true,"service":"velo-redis.nrun-platform.svc.cluster.local:6379"}',
-           N'VELO/Redis cache role is provisioned for hot cognition paths; TALA provider client wiring is next.'
+           N'VELO/Redis cache role is provisioned for hot cognition paths and marked operational when reachable.'
     UNION ALL SELECT NULL, N'notebook', N'onedb-jupyter', N'jupyter', 200, N'provisioned',
            N'{"operations":["memory-quality-analysis","embedding-evaluation","consolidation-research","drift-analysis"],"read":true,"write":false,"service":"onedb-jupyter.nrun-platform.svc.cluster.local:8888","secret":"onedb-jupyter-secrets"}',
            N'Kubernetes Jupyter workbench is provisioned as an internal research path; not a serving path.'

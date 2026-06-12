@@ -20,8 +20,8 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 - Public hosts: `https://1db.io`, `https://www.1db.io`
 - 1db image: `nrun/1db:k8s-20260612-provider-manifest`
 - SAPI image: `nrun/sapi.nrun.ws:k8s-onedb-provider-20260612-020856`
-- TALA image: `nrun/tala.nrun.ws:k8s-onedb-provider-20260612-020856`
-- daTALAke provisioned services: `onedb-mongo` (`mongo:7.0`), `onedb-qdrant` (`qdrant/qdrant:v1.12.5`), `onedb-jupyter` (`quay.io/jupyter/base-notebook:python-3.12`), `velo-redis` (`redis:7-alpine`)
+- TALA image: `nrun/tala.nrun.ws:k8s-onedb-real-providers-20260612-024125`
+- daTALAke services: `onedb-mongo` (`mongo:7.0`), `onedb-qdrant` (`qdrant/qdrant:v1.12.5`), `onedb-jupyter` (`quay.io/jupyter/base-notebook:python-3.12`), `velo-redis` (`redis:7-alpine`)
 - Kubernetes ingress: `one-db`, Traefik class, TLS secret `one-db-tls`
 - Origin certificate: Let's Encrypt for `1db.io` and `www.1db.io`, expires `2026-09-10`
 - Origin certificate renewal: `/opt/nrun-certs/1db.io/renew-and-sync.sh` on `seca`, scheduled daily at `03:17`
@@ -29,7 +29,7 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 - Cloudflare routing: legacy Worker route `1db.io/* -> 1db-io` removed for public cutover
 - Cloudflare SSL mode: `strict`; Always Use HTTPS: `on`
 
-Public smoke checks passed for `/`, `/health`, `/ready`, `/api/v1/platform/manifest`, `POST /api/v1/cognition/events`, `POST /api/v1/cognition/context/retrieve`, `GET /api/v1/cognition/context/packets/{packetUid}`, `GET /api/v1/cognition/backends`, and `GET /api/v1/cognition/backends/plan`. Internal smoke confirmed MongoDB ping plus ready Kubernetes rollouts for MongoDB, Qdrant, and Jupyter.
+Public smoke checks passed for `/`, `/health`, `/ready`, `/api/v1/platform/manifest`, `POST /api/v1/cognition/events`, `POST /api/v1/cognition/context/retrieve`, `GET /api/v1/cognition/context/packets/{packetUid}`, `GET /api/v1/cognition/backends`, and `GET /api/v1/cognition/backends/plan`. The provider-backed smoke returned `stored:sql+document+vector` for an ingested event, with retrieve and research route plans both `operational`. Internal runtime now probes MongoDB, Qdrant, Jupyter, and VELO/Redis from TALA.
 
 ## Canonical API Path
 
@@ -63,7 +63,7 @@ The app forwards requests to:
 2. Registration: register `1db` in `client.Applications` and map authorized tenants through `client.TenantApplications`.
 3. TALA schema: create `onedb` SQL Server schema for control-ledger persistence and backend registry.
 4. SAPI/TALA controllers: implement ingestion, retrieval, continuity, governance, and context packet routes.
-5. daTALAke expansion: add MongoDB document, Jupyter notebook, vector, graph, object/event, search, and cache providers behind TALA-owned abstractions.
+5. daTALAke expansion: MongoDB document, Qdrant vector, Jupyter notebook, and VELO/Redis cache providers are operational behind TALA-owned abstractions. Remaining expansion: dedicated graph, object/event artifact store, dedicated lexical/hybrid search, and embedding/consolidation workers.
 6. Workers: add Kubernetes workers for embedding, consolidation, decay, contradiction review, and context packet precomputation.
 
 ## Data Ownership
