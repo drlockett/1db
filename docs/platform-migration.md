@@ -18,7 +18,7 @@ The Worker/D1 code remains useful as a preview harness, but canonical cognition 
 
 - Namespace: `nrun-platform`
 - Public hosts: `https://1db.io`, `https://www.1db.io`
-- 1db image: `nrun/1db:k8s-20260612-restore-public-content-025152`
+- 1db image: `nrun/1db:k8s-20260612-sanitize-public-content-025931`
 - SAPI image: `nrun/sapi.nrun.ws:k8s-onedb-provider-20260612-020856`
 - TALA image: `nrun/tala.nrun.ws:k8s-onedb-real-providers-20260612-024125`
 - daTALAke services: `onedb-mongo` (`mongo:7.0`), `onedb-qdrant` (`qdrant/qdrant:v1.12.5`), `onedb-jupyter` (`quay.io/jupyter/base-notebook:python-3.12`), `velo-redis` (`redis:7-alpine`)
