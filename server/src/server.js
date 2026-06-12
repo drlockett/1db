@@ -247,10 +247,10 @@ const server = createServer(async (req, res) => {
       }
       return html(res, 202, waitlistThanksPage());
     }
-    if (url.pathname === '/health') return json(res, 200, { ok: true, service: '1db.io', mode: 'sapi-tala', time: new Date().toISOString() });
+    if (url.pathname === '/health') return json(res, 200, { ok: true, service: '1db.io', time: new Date().toISOString() });
     if (url.pathname === '/ready') {
       const result = await sapi('/health', { timeoutMs: 5000 });
-      return json(res, result.ok ? 200 : 503, { ok: result.ok, sapiStatus: result.status, service: '1db.io' });
+      return json(res, result.ok ? 200 : 503, { ok: result.ok, service: '1db.io' });
     }
     if (url.pathname === '/openapi.json' && req.method === 'GET') return json(res, 200, openApiDocument(publicOrigin));
     if (url.pathname === '/api/v1/platform/manifest') {
