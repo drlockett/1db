@@ -121,7 +121,7 @@ await db.temporal.reconstruct()</code></pre></article><article class="card"><h3>
 }
 
 export function waitlistPage(message = '') {
-  return page(`${nav('Waitlist')}<main><section class="hero split"><div><p class="pill">Private preview</p><h1>Join the 1db waitlist.</h1><p class="lead">Get early access to the distributed intelligence database for semantic memory, realtime knowledge, relationships, vectors, and AI-native context.</p><p class="muted">Tell us what you want to build and we will prioritize access for teams pushing agent memory and distributed cognition forward.</p></div><form class="card" method="post" action="/waitlist"><h2>Request access</h2>${message ? `<p class="pill">${esc(message)}</p>` : ''}<label>Email <input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>What would you like to build? <textarea name="question" rows="5" placeholder="Agents, memory, graph, realtime knowledge, enterprise use case..."></textarea></label><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-10000px" aria-hidden="true"><button type="submit">Join waitlist</button><p class="muted">Submissions are routed to the 1db team while the NodeRunner onboarding flow comes online.</p></form></section></main>`, 'Join the 1db waitlist');
+  return page(`${nav('Waitlist')}<main><section class="hero split"><div><p class="pill">Private preview</p><h1>Join the 1db waitlist.</h1><p class="lead">Get early access to the distributed intelligence database for semantic memory, realtime knowledge, relationships, vectors, and AI-native context.</p><p class="muted">Tell us what you want to build and we will prioritize access for teams pushing agent memory and distributed cognition forward.</p></div><form class="card" method="post" action="/waitlist"><h2>Request access</h2>${message ? `<p class="pill">${esc(message)}</p>` : ''}<label>Email <input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>What would you like to build? <textarea name="question" rows="5" placeholder="Agents, memory, graph, realtime knowledge, enterprise use case..."></textarea></label><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-10000px" aria-hidden="true"><button type="submit">Join waitlist</button></form></section></main>`, 'Join the 1db waitlist');
 }
 
 export function waitlistThanksPage() {
@@ -129,7 +129,7 @@ export function waitlistThanksPage() {
 }
 
 export function signInPage() {
-  return page(`<main class="hero"><section class="card" style="max-width:520px;margin:auto"><p class="brand">1db.io</p><h1>Sign in</h1><p class="muted">Private account access is moving into the NodeRunner tenant control plane.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/">Home</a></p></section></main>`, 'Sign in');
+  return page(`<main class="hero"><section class="card" style="max-width:520px;margin:auto"><p class="brand">1db.io</p><h1>Sign in</h1><p class="muted">We will respond as soon as possible.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/">Home</a></p></section></main>`, 'Sign in');
 }
 
 export function notFoundPage(title = 'Not found', detail = 'No route matched.') {

@@ -180,7 +180,7 @@ const server = createServer(async (req, res) => {
       return json(res, 200, {
         applicationKey: appKey,
         applicationName: '1db',
-        storagePolicy: 'NodeRunner managed persistence',
+        storagePolicy: 'Managed persistence',
         canonicalTenantHeader: 'X-NRun-Tenant-Uid',
         cognitiveRoutes: [
           '/api/v1/cognition/events',
