@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import {
   docsPage,
   homePage,
@@ -15,6 +15,8 @@ const publicOrigin = process.env.PUBLIC_ORIGIN || 'https://1db.io';
 const sapiBase = (process.env.SAPI_BASE_URL || 'https://sapi.nrun.ws/v1').replace(/\/$/, '');
 const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVICE_TOKEN || '';
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
+const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
+const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken || '1db-private-preview';
 
 const allowedOrigins = new Set([
   publicOrigin,
@@ -61,6 +63,10 @@ function html(res, status, body) {
   });
 }
 
+function redirect(res, location, headers = {}) {
+  send(res, 303, '', { location, ...headers });
+}
+
 function parseForm(text) {
   const params = new URLSearchParams(text || '');
   return Object.fromEntries(params.entries());
@@ -72,6 +78,49 @@ function cleanPath(value) {
     .filter(Boolean)
     .map(part => encodeURIComponent(decodeURIComponent(part)))
     .join('/');
+}
+
+function parseCookies(req) {
+  return Object.fromEntries(String(req.headers.cookie || '')
+    .split(';')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .map(part => {
+      const index = part.indexOf('=');
+      return index < 0 ? [part, ''] : [part.slice(0, index), decodeURIComponent(part.slice(index + 1))];
+    }));
+}
+
+function signSession(payload) {
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = createHmac('sha256', sessionSecret).update(encoded).digest('base64url');
+  return `${encoded}.${signature}`;
+}
+
+function readSession(req) {
+  const cookie = parseCookies(req).one_db_session;
+  if (!cookie || !cookie.includes('.')) return null;
+  const [encoded, signature] = cookie.split('.', 2);
+  const expected = createHmac('sha256', sessionSecret).update(encoded).digest('base64url');
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (actualBuffer.length !== expectedBuffer.length || !timingSafeEqual(actualBuffer, expectedBuffer)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+    return payload.expires > Date.now() ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+function sessionCookie(account) {
+  const payload = {
+    accountId: account.id || account.Id,
+    tenantId: account.tenantId || account.TenantId,
+    email: account.email || account.Email || account.userName || account.UserName || '',
+    expires: Date.now() + 8 * 60 * 60 * 1000
+  };
+  return `one_db_session=${encodeURIComponent(signSession(payload))}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=28800`;
 }
 
 async function readBody(req) {
@@ -160,6 +209,34 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
     if (url.pathname === '/docs' && req.method === 'GET') return html(res, 200, docsPage());
     if (url.pathname === '/signin' && req.method === 'GET') return html(res, 200, signInPage());
+    if (url.pathname === '/signin' && req.method === 'POST') {
+      const { text } = await readBody(req);
+      const form = parseForm(text);
+      const email = String(form.email || '').trim();
+      const password = String(form.password || '');
+      if (!email || !password) return html(res, 400, signInPage('Enter your email and password.'));
+      const result = await sapi('/accounts/login', {
+        method: 'POST',
+        body: {
+          userName: email,
+          password,
+          applicationId: oneDbApplicationId,
+          ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress || '',
+          userAgent: req.headers['user-agent'] || '',
+          returnUrl: '/account'
+        }
+      });
+      if (!result.ok || !result.data) return html(res, 401, signInPage('Invalid email or password.'));
+      return redirect(res, '/account', { 'set-cookie': sessionCookie(result.data) });
+    }
+    if (url.pathname === '/signout' && req.method === 'POST') {
+      return redirect(res, '/', { 'set-cookie': 'one_db_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0' });
+    }
+    if (url.pathname === '/account' && req.method === 'GET') {
+      const session = readSession(req);
+      if (!session) return redirect(res, '/signin');
+      return html(res, 200, signInPage('', session));
+    }
     if (url.pathname === '/waitlist' && req.method === 'GET') return html(res, 200, waitlistPage());
     if (url.pathname === '/waitlist' && req.method === 'POST') {
       const { text } = await readBody(req);

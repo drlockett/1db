@@ -128,8 +128,12 @@ export function waitlistThanksPage() {
   return page(`${nav('Waitlist')}<main><section class="hero"><div class="card" style="max-width:760px;margin:auto;text-align:center"><p class="pill">Request received</p><h1>You are on the list.</h1><p class="lead" style="margin:auto">Thanks for your interest in 1db. We received your request and will follow up when preview access opens.</p><p><a class="btn" href="/">Back to home</a></p></div></section></main>`, 'You are on the 1db waitlist');
 }
 
-export function signInPage() {
-  return page(`<main class="hero"><section class="card" style="max-width:520px;margin:auto"><p class="brand">1db.io</p><h1>Sign in</h1><p class="muted">We will respond as soon as possible.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/">Home</a></p></section></main>`, 'Sign in');
+export function signInPage(message = '', session = null) {
+  if (session) {
+    return page(`${nav()}<main><section class="hero"><div class="card" style="max-width:720px;margin:auto"><p class="pill">Private preview</p><h1>Account</h1><p class="lead">You are signed in to 1db.</p><p class="muted">${esc(session.email || 'Private preview account')}</p><form method="post" action="/signout"><button type="submit">Sign out</button></form></div></section></main>`, '1db Account');
+  }
+
+  return page(`${nav()}<main><section class="hero split"><div><p class="pill">Private preview</p><h1>Sign in</h1><p class="lead">Use a provisioned 1db private-preview account.</p><p class="muted">New account requests are handled through the waitlist.</p><p><a class="btn alt" href="/waitlist">Join the waitlist</a></p></div><form class="card" method="post" action="/signin"><h2>Account access</h2>${message ? `<p class="pill">${esc(message)}</p>` : ''}<label>Email <input name="email" type="email" required autocomplete="email"></label><label>Password <input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Sign in</button></form></section></main>`, 'Sign in');
 }
 
 export function notFoundPage(title = 'Not found', detail = 'No route matched.') {
