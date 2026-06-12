@@ -297,27 +297,27 @@ USING
     SELECT CAST(NULL AS BIGINT) AS TenantId, N'control-sql' AS BackendRole, N'sqlserver-nrun' AS ProviderKey, N'sqlserver' AS ProviderType, 10 AS Priority, N'operational' AS HealthStatus,
            N'{"operations":["tenant-governance","event-ledger","memory-ledger","continuity","context-packets"],"read":true,"write":true}' AS CapabilitiesJson,
            N'Canonical 1db control ledger in SQL Server Nrun.' AS Notes
-    UNION ALL SELECT NULL, N'document', N'mongodb-planned', N'mongodb', 40, N'planned',
-           N'{"operations":["payload-documents","memory-documents","context-packet-documents","session-snapshots"],"read":true,"write":true}',
-           N'Planned flexible document backend for rich cognition payloads and packets.'
+    UNION ALL SELECT NULL, N'document', N'onedb-mongo', N'mongodb', 40, N'provisioned',
+           N'{"operations":["payload-documents","memory-documents","context-packet-documents","session-snapshots"],"read":true,"write":true,"service":"onedb-mongo.nrun-platform.svc.cluster.local:27017","secret":"onedb-mongo-secrets"}',
+           N'Kubernetes MongoDB document backend is provisioned; TALA provider client wiring is next.'
     UNION ALL SELECT NULL, N'event-object', N'pending-object-store', N'object-store', 100, N'planned',
            N'{"operations":["raw-events","transcripts","large-artifacts","exports"],"read":true,"write":true}',
            N'Planned object/N2/R2-compatible event artifact store.'
-    UNION ALL SELECT NULL, N'vector', N'pending-vector-store', N'vector-db', 100, N'planned',
-           N'{"operations":["embedding-write","semantic-recall","nearest-neighbor"],"read":true,"write":true}',
-           N'Planned vector retrieval provider.'
+    UNION ALL SELECT NULL, N'vector', N'onedb-qdrant', N'qdrant', 100, N'provisioned',
+           N'{"operations":["embedding-write","semantic-recall","nearest-neighbor"],"read":true,"write":true,"service":"onedb-qdrant.nrun-platform.svc.cluster.local:6333","secret":"onedb-qdrant-secrets"}',
+           N'Kubernetes Qdrant vector backend is provisioned; TALA provider client wiring is next.'
     UNION ALL SELECT NULL, N'graph', N'sqlserver-edge-table', N'sqlserver', 50, N'operational',
            N'{"operations":["relationship-ledger","graph-neighborhood","causality"],"read":true,"write":true}',
            N'Initial graph role backed by SQL Server edge tables.'
     UNION ALL SELECT NULL, N'search', N'sqlserver-lexical', N'sqlserver', 50, N'operational',
            N'{"operations":["lexical-recall","bm25-planned","hybrid-recall-planned"],"read":true,"write":false}',
            N'Initial lexical retrieval over SQL Server memory text.'
-    UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', N'redis', 50, N'planned',
-           N'{"operations":["active-context-cache","queue-locks","short-lived-packets"],"read":true,"write":true}',
-           N'VELO/Redis cache role for hot cognition paths.'
-    UNION ALL SELECT NULL, N'notebook', N'jupyter-planned', N'jupyter', 200, N'planned',
-           N'{"operations":["memory-quality-analysis","embedding-evaluation","consolidation-research","drift-analysis"],"read":true,"write":false}',
-           N'Planned research and operations workbench; not a serving path.'
+    UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', N'redis', 50, N'provisioned',
+           N'{"operations":["active-context-cache","queue-locks","short-lived-packets"],"read":true,"write":true,"service":"velo-redis.nrun-platform.svc.cluster.local:6379"}',
+           N'VELO/Redis cache role is provisioned for hot cognition paths; TALA provider client wiring is next.'
+    UNION ALL SELECT NULL, N'notebook', N'onedb-jupyter', N'jupyter', 200, N'provisioned',
+           N'{"operations":["memory-quality-analysis","embedding-evaluation","consolidation-research","drift-analysis"],"read":true,"write":false,"service":"onedb-jupyter.nrun-platform.svc.cluster.local:8888","secret":"onedb-jupyter-secrets"}',
+           N'Kubernetes Jupyter workbench is provisioned as an internal research path; not a serving path.'
 ) AS source
    ON ((target.TenantId IS NULL AND source.TenantId IS NULL) OR target.TenantId = source.TenantId)
   AND target.BackendRole = source.BackendRole
@@ -328,6 +328,14 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN
     INSERT (TenantId, BackendRole, ProviderKey, ProviderType, IsEnabled, Priority, CapabilitiesJson, HealthStatus, Notes, CreatedUtc)
     VALUES (source.TenantId, source.BackendRole, source.ProviderKey, source.ProviderType, 1, source.Priority, source.CapabilitiesJson, source.HealthStatus, source.Notes, SYSUTCDATETIME());
+
+UPDATE onedb.StoreBackends
+SET IsEnabled = 0,
+    UpdatedUtc = SYSUTCDATETIME(),
+    Notes = N'Deprecated placeholder entry superseded by Kubernetes provisioned backend.'
+WHERE TenantId IS NULL
+  AND BackendRole IN (N'document', N'vector', N'notebook')
+  AND ProviderKey IN (N'mongodb-planned', N'pending-vector-store', N'jupyter-planned');
 GO
 
 SELECT Id, Code, Name, BaseUrl, IsActive
