@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import {
+  adminPage,
   docsPage,
   homePage,
   notFoundPage,
@@ -200,6 +201,34 @@ async function proxyCognition(req, res, url, parts) {
   return json(res, result.status, result.data ?? {});
 }
 
+async function proxyProjectCognition(req, res, url, parts) {
+  const { json: bodyJson } = await readBody(req);
+  const tenantUid = tenantUidFrom(req, url, bodyJson);
+  if (!tenantUid) {
+    return json(res, 400, {
+      error: {
+        code: 'tenant_required',
+        message: 'Set X-NRun-Tenant-Uid, X-1db-Tenant-Uid, tenantUid query, or tenantUid body value.'
+      }
+    });
+  }
+
+  const path = cleanPath(parts.join('/'));
+  const suffix = `${path ? `/${path}` : ''}${url.search || ''}`;
+  const result = await sapi(
+    `/platform/applications/${encodeURIComponent(appKey)}/tenants/${encodeURIComponent(tenantUid)}/project-cognition${suffix}`,
+    {
+      method: req.method,
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : (bodyJson ?? {}),
+      headers: {
+        'x-1db-request-id': req.headers['x-request-id'] || randomUUID(),
+        ...(req.headers['idempotency-key'] ? { 'idempotency-key': req.headers['idempotency-key'] } : {})
+      }
+    }
+  );
+  return json(res, result.status, result.data ?? {});
+}
+
 const server = createServer(async (req, res) => {
   try {
     res.req = req;
@@ -223,19 +252,22 @@ const server = createServer(async (req, res) => {
           applicationId: oneDbApplicationId,
           ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress || '',
           userAgent: req.headers['user-agent'] || '',
-          returnUrl: '/account'
+          returnUrl: '/admin'
         }
       });
       if (!result.ok || !result.data) return html(res, 401, signInPage('Invalid email or password.'));
-      return redirect(res, '/account', { 'set-cookie': sessionCookie(result.data) });
+      return redirect(res, '/admin', { 'set-cookie': sessionCookie(result.data) });
     }
     if (url.pathname === '/signout' && req.method === 'POST') {
       return redirect(res, '/', { 'set-cookie': 'one_db_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0' });
     }
     if (url.pathname === '/account' && req.method === 'GET') {
+      return redirect(res, '/admin');
+    }
+    if (url.pathname === '/admin' && req.method === 'GET') {
       const session = readSession(req);
       if (!session) return redirect(res, '/signin');
-      return html(res, 200, signInPage('', session));
+      return html(res, 200, adminPage(session));
     }
     if (url.pathname === '/waitlist' && req.method === 'GET') return html(res, 200, waitlistPage());
     if (url.pathname === '/waitlist' && req.method === 'POST') {
@@ -265,11 +297,20 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/context/packets/{packetUid}',
           '/api/v1/cognition/backends',
           '/api/v1/cognition/backends/plan',
-          '/api/v1/cognition/projects/{projectId}/continuity'
+          '/api/v1/cognition/projects/{projectId}/continuity',
+          '/api/project-cognition',
+          '/api/project-cognition/{projectKey}',
+          '/api/project-cognition/{projectKey}/active'
         ]
       });
     }
     const parts = url.pathname.split('/').filter(Boolean);
+    if (parts[0] === 'api' && parts[1] === 'project-cognition') {
+      return proxyProjectCognition(req, res, url, parts.slice(2));
+    }
+    if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'project-cognition') {
+      return proxyProjectCognition(req, res, url, parts.slice(3));
+    }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cognition') {
       return proxyCognition(req, res, url, parts.slice(3));
     }

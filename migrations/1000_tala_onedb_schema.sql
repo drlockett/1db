@@ -243,6 +243,56 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.Con
     CREATE INDEX IX_OneDb_ContextPackets_Tenant_Project ON onedb.ContextPackets(TenantId, ProjectId, CreatedUtc DESC);
 GO
 
+IF OBJECT_ID(N'onedb.ProjectCognition', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.ProjectCognition
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_ProjectCognition PRIMARY KEY,
+        ProjectCognitionUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_Uid DEFAULT NEWID(),
+        TenantId BIGINT NOT NULL,
+        ApplicationId BIGINT NOT NULL,
+        ProjectKey NVARCHAR(256) NOT NULL,
+        ProjectName NVARCHAR(256) NOT NULL,
+        Description NVARCHAR(2000) NULL,
+        ArchitectureNotes NVARCHAR(MAX) NULL,
+        OperationalRulesJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_OperationalRules DEFAULT N'[]',
+        DeploymentRulesJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_DeploymentRules DEFAULT N'[]',
+        CodingStandardsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_CodingStandards DEFAULT N'[]',
+        ToolPreferencesJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_ToolPreferences DEFAULT N'[]',
+        EnvironmentNotes NVARCHAR(MAX) NULL,
+        SecurityRequirementsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_SecurityRequirements DEFAULT N'[]',
+        OrganizationalConstraintsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_OrganizationalConstraints DEFAULT N'[]',
+        Version INT NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_Version DEFAULT 1,
+        IsActive BIT NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_IsActive DEFAULT 1,
+        SupersedesProjectCognitionUid UNIQUEIDENTIFIER NULL,
+        ChangeReason NVARCHAR(1000) NULL,
+        CreatedBy NVARCHAR(256) NULL,
+        AuditJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_Audit DEFAULT N'{}',
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_ProjectCognition_UpdatedUtc DEFAULT SYSUTCDATETIME(),
+        DeactivatedUtc DATETIME2(3) NULL,
+        CONSTRAINT FK_OneDb_ProjectCognition_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_ProjectCognition_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ProjectCognition') AND name = N'UX_OneDb_ProjectCognition_Uid')
+    CREATE UNIQUE INDEX UX_OneDb_ProjectCognition_Uid ON onedb.ProjectCognition(ProjectCognitionUid);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ProjectCognition') AND name = N'UX_OneDb_ProjectCognition_Project_Version')
+    CREATE UNIQUE INDEX UX_OneDb_ProjectCognition_Project_Version ON onedb.ProjectCognition(TenantId, ProjectKey, Version);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ProjectCognition') AND name = N'UX_OneDb_ProjectCognition_Active')
+    CREATE UNIQUE INDEX UX_OneDb_ProjectCognition_Active ON onedb.ProjectCognition(TenantId, ProjectKey) WHERE IsActive = 1;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ProjectCognition') AND name = N'IX_OneDb_ProjectCognition_Project')
+    CREATE INDEX IX_OneDb_ProjectCognition_Project ON onedb.ProjectCognition(TenantId, ProjectKey, Version DESC, UpdatedUtc DESC);
+GO
+
 IF OBJECT_ID(N'onedb.StoreBackends', N'U') IS NULL
 BEGIN
     CREATE TABLE onedb.StoreBackends

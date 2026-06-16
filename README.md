@@ -1,22 +1,18 @@
 # 1db.io
 
-1db.io is a programmable edge API platform for links, routes, intakes, webhooks, and lightweight internet-addressable resources.
+1db.io is cognitive infrastructure for persistent memory, project-aware execution context, and agent continuity.
 
 ## Local development
 
 ```bash
 npm install
-npm run check
-npx wrangler d1 migrations apply 1db-control --local
-npx wrangler dev --local
+npm run start:platform
 ```
 
 ## Production deploy
 
 ```bash
-export CLOUDFLARE_API_TOKEN=...
-npx wrangler d1 migrations apply 1db-control --remote
-npx wrangler deploy
+docker build -t one-db-platform-server .
 ```
 
 ## API keys
@@ -80,7 +76,25 @@ Run the live integration scenario:
 npm run test:cognition
 ```
 
-The MVP uses Cloudflare D1 tables for append-only events, memory atoms, evidence, entities, graph edges, continuity states, and lexical embedding metadata. Vector-provider integration, contradiction handling, consolidation, decay jobs, and governance UI are next-phase work.
+The live app runs as the 1db platform server and uses the platform API for durable cognition persistence. Canonical 1db cognition data belongs in managed 1db storage under the `onedb` schema, with provider-backed document, vector, graph, cache, and notebook roles represented by backend catalog records.
+
+## Project Cognition
+
+Project Cognition is first-class persistent execution memory for how an AI should operate within a project, team, workspace, tenant, repository, environment, or domain.
+
+Public app routes proxy through the platform API into managed 1db persistence:
+
+```bash
+GET    /api/project-cognition
+GET    /api/project-cognition/{projectKey}
+POST   /api/project-cognition
+PUT    /api/project-cognition/{id}
+POST   /api/project-cognition/{id}/activate
+POST   /api/project-cognition/{id}/deactivate
+GET    /api/project-cognition/{projectKey}/active
+```
+
+The active response includes `agentContext`, suitable for agent initialization, workspace bootstrapping, and prompt assembly.
 
 ### Cognitive integrity Phase 2
 
