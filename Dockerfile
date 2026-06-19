@@ -5,6 +5,7 @@ ENV NODE_ENV=production
 
 COPY server/package.json ./server/package.json
 COPY server/src ./server/src
+COPY server/public ./server/public
 
 WORKDIR /app/server
 EXPOSE 8080

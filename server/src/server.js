@@ -1,5 +1,8 @@
 import { createServer } from 'node:http';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { dirname, join, normalize } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   adminPage,
   docsPage,
@@ -18,6 +21,7 @@ const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVIC
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
 const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken || '1db-private-preview';
+const publicDir = normalize(join(dirname(fileURLToPath(import.meta.url)), '..', 'public'));
 
 const allowedOrigins = new Set([
   publicOrigin,
@@ -62,6 +66,21 @@ function html(res, status, body) {
     'content-type': 'text/html; charset=utf-8',
     'cache-control': 'no-store'
   });
+}
+
+async function asset(res, name, contentType, head = false) {
+  const path = normalize(join(publicDir, name));
+  if (!path.startsWith(publicDir)) return send(res, 404, '', { 'cache-control': 'no-store' });
+  try {
+    const body = await readFile(path);
+    return send(res, 200, head ? '' : body, {
+      'content-type': contentType,
+      'content-length': body.length,
+      'cache-control': 'public, max-age=31536000, immutable'
+    });
+  } catch {
+    return send(res, 404, '', { 'cache-control': 'no-store' });
+  }
 }
 
 function redirect(res, location, headers = {}) {
@@ -236,6 +255,9 @@ const server = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
+    if (url.pathname === '/assets/continuity.jpg' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'continuity.jpg', 'image/jpeg', req.method === 'HEAD');
+    }
     if (url.pathname === '/docs' && req.method === 'GET') return html(res, 200, docsPage());
     if (url.pathname === '/signin' && req.method === 'GET') return html(res, 200, signInPage());
     if (url.pathname === '/signin' && req.method === 'POST') {
