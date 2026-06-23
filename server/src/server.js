@@ -255,8 +255,8 @@ const server = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
-    if (url.pathname === '/assets/continuity.jpg' && ['GET', 'HEAD'].includes(req.method)) {
-      return asset(res, 'continuity.jpg', 'image/jpeg', req.method === 'HEAD');
+    if (url.pathname === '/assets/learns.png' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'learns.png', 'image/png', req.method === 'HEAD');
     }
     if (url.pathname === '/docs' && req.method === 'GET') return html(res, 200, docsPage());
     if (url.pathname === '/signin' && req.method === 'GET') return html(res, 200, signInPage());

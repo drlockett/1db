@@ -32,7 +32,7 @@ function nav(active = '') {
 }
 
 function graphVisual() {
-  return `<img class="heroGraphic" src="/assets/continuity.jpg" width="1536" height="1024" alt="Continuity across time: identity, experiences, knowledge, skills, projects, events, goals, and relationships orbiting persistent intelligence.">`;
+  return `<img class="heroGraphic" src="/assets/learns.png" width="1494" height="1052" alt="1db persistent intelligence surrounded by identity, knowledge, memory, relationships, projects, goals, and events.">`;
 }
 
 export function homePage() {
