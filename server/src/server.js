@@ -258,6 +258,9 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/assets/learns.png' && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'learns.png', 'image/png', req.method === 'HEAD');
     }
+    if (url.pathname === '/assets/cognition-graph.png' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'cognition-graph.png', 'image/png', req.method === 'HEAD');
+    }
     if (url.pathname === '/docs' && req.method === 'GET') return html(res, 200, docsPage());
     if (url.pathname === '/signin' && req.method === 'GET') return html(res, 200, signInPage());
     if (url.pathname === '/signin' && req.method === 'POST') {
