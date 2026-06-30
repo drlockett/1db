@@ -315,11 +315,12 @@ const cgEsc = value => String(value ?? '').replace(/[&<>"]/g, char => ({'&':'&am
 function cgJson(data, intent = '') {
   if (intent === 'decompose' && data?.concept) {
     const concepts = data.composingConcepts || [];
-    const fallback = [...new Set((data.associations || []).flatMap(item => item.targetConcepts || []))]
-      .map(slug => ({slug, canonicalLabel: slug, shortDefinition: ''}));
-    const parts = concepts.length ? concepts : fallback;
+    if (!concepts.length) {
+      cg('cgPreview').textContent = (data.concept.canonicalLabel || 'Concept')+' has no decomposition links yet. Try the concept by itself to view associations.';
+      return;
+    }
     cg('cgPreview').innerHTML = cgEsc(data.concept.canonicalLabel || 'Concept')+' decomposes into:\\n'
-      +parts.map(part => '- <a href="/admin#cognition-graph" data-cg-concept="'+cgEsc(part.slug || part.canonicalLabel)+'">'
+      +concepts.map(part => '- <a href="/admin#cognition-graph" data-cg-concept="'+cgEsc(part.slug || part.canonicalLabel)+'">'
         +cgEsc(part.canonicalLabel || part.slug)
         +'</a>'+(part.shortDefinition ? ' - '+cgEsc(part.shortDefinition) : '')).join('\\n');
     return;
