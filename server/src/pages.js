@@ -224,9 +224,10 @@ export function adminPage(session) {
       <h2>Graph Response</h2>
       <div class="hintList">
         <div class="hintChip"><strong>Decompose</strong><span class="monoTiny">decompose cold</span></div>
-        <div class="hintChip"><strong>Infer</strong><span class="monoTiny">infer water=1,cold=.85</span></div>
+        <div class="hintChip"><strong>Seed lexicon</strong><span class="monoTiny">seed lexicon 1000</span></div>
+        <div class="hintChip"><strong>Count</strong><span class="monoTiny">count concepts</span></div>
         <div class="hintChip"><strong>Find</strong><span class="monoTiny">find black ice</span></div>
-        <div class="hintChip"><strong>Explain</strong><span class="monoTiny">explain SESSION_ID</span></div>
+        <div class="hintChip"><strong>Infer</strong><span class="monoTiny">infer water=1,cold=.85</span></div>
       </div>
       <pre class="resultPre"><code id="cgPreview">Type a graph query.</code></pre>
     </article>
@@ -320,6 +321,22 @@ function cgJson(data, intent = '') {
     cg('cgPreview').textContent = 'Outputs:\\n'+outputs+(trace ? '\\n\\nTrace:\\n'+trace : '');
     return;
   }
+  if (intent === 'seed' && data?.job?.result) {
+    const result = data.job.result;
+    cg('cgPreview').textContent = 'Seed batch complete.\\n'
+      +'Mode: '+(result.mode || 'lexicon')+'\\n'
+      +'Offset: '+(result.offset || 0)+'\\n'
+      +'Limit: '+(result.limit || 'default')+'\\n'
+      +'Concepts now: '+data.conceptCount+'\\n'
+      +'Associations now: '+data.associationCount+'\\n'
+      +'Next command: seed lexicon '+(Number(result.limit || 1000))+' offset '+((Number(result.offset || 0)) + Number(result.limit || 1000));
+    return;
+  }
+  if (intent === 'stats' && data?.conceptsByPartOfSpeech) {
+    cg('cgPreview').textContent = 'Concepts: '+data.conceptCount+'\\nAssociations: '+data.associationCount+'\\n\\n'
+      +Object.entries(data.conceptsByPartOfSpeech).map(([key, value]) => '- '+key+': '+value).join('\\n');
+    return;
+  }
   cg('cgPreview').textContent = JSON.stringify(data, null, 2);
 }
 function cgSetStatus(message) {
@@ -359,8 +376,28 @@ function cgSubmit() {
     if (normalized === 'graph' || normalized === 'load graph') {
       return cgFetch('/api/v1/cognition/graph'+cgNamespaceQuery());
     }
+    if (verb === 'count' || verb === 'stats' || normalized === 'count concepts') {
+      return cgFetch('/api/v1/cognition/stats', {}, 'stats');
+    }
     if (verb === 'seed') {
-      return cgFetch('/api/v1/cognition/seed', {method:'POST', body:JSON.stringify({namespace:'1db', word:cgCleanTerm(rest.join(' ')) || 'cold'})});
+      const text = rest.join(' ');
+      const offsetMatch = text.match(/\\boffset\\s+(\\d+)/i);
+      const limitMatch = text.match(/\\b(\\d{1,5})\\b/);
+      const parts = [];
+      if (/\\bnouns?\\b/i.test(text)) parts.push('noun');
+      if (/\\bverbs?\\b/i.test(text)) parts.push('verb');
+      if (/\\b(adj|adjective|adjectives)\\b/i.test(text)) parts.push('adjective');
+      const lexicon = /\\b(all|lexicon|wordnet|nouns?|verbs?|adj|adjectives?)\\b/i.test(text);
+      if (lexicon) {
+        return cgFetch('/api/v1/cognition/seed', {method:'POST', body:JSON.stringify({
+          namespace:'1db',
+          mode:'lexicon',
+          partsOfSpeech: parts.length ? parts : ['noun','verb','adjective'],
+          limit: limitMatch ? Number(limitMatch[1]) : 1000,
+          offset: offsetMatch ? Number(offsetMatch[1]) : 0
+        })}, 'seed');
+      }
+      return cgFetch('/api/v1/cognition/seed', {method:'POST', body:JSON.stringify({namespace:'1db', word:cgCleanTerm(text) || 'cold'})}, 'seed');
     }
     if (verb === 'infer' || raw.includes('=')) {
       const inputText = verb === 'infer' ? raw.replace(/^infer\\s+/i, '') : raw;
@@ -505,6 +542,7 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
       '/api/v1/cognition/context/retrieve': { post: { summary: 'Retrieve a durable context packet.' } },
       '/api/v1/cognition/context/packets/{packetUid}': { get: { summary: 'Read a previously created context packet.' } },
       '/api/v1/cognition/graph': { get: { summary: 'Read the 1DB base cognition graph root.' } },
+      '/api/v1/cognition/stats': { get: { summary: 'Read cognition graph concept and association counts.' } },
       '/api/v1/cognition/seed': { post: { summary: 'Run the base cognition graph seeder.' } },
       '/api/v1/cognition/concepts/{conceptId}': { get: { summary: 'Read a cognition concept vertex.' } },
       '/api/v1/cognition/concepts/by-label/{label}': { get: { summary: 'Resolve a concept vertex by label.' } },

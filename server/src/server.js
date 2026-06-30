@@ -222,6 +222,7 @@ async function proxyCognition(req, res, url, parts) {
     {
       method: req.method,
       body: ['GET', 'HEAD'].includes(req.method) ? undefined : (bodyJson ?? {}),
+      timeoutMs: path === 'seed' ? 120000 : 15000,
       headers: {
         'x-1db-request-id': req.headers['x-request-id'] || randomUUID(),
         ...(req.headers['idempotency-key'] ? { 'idempotency-key': req.headers['idempotency-key'] } : {})
@@ -340,6 +341,7 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/context/retrieve',
           '/api/v1/cognition/context/packets/{packetUid}',
           '/api/v1/cognition/graph',
+          '/api/v1/cognition/stats',
           '/api/v1/cognition/seed',
           '/api/v1/cognition/concepts/{conceptId}',
           '/api/v1/cognition/concepts/by-label/{label}',
