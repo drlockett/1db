@@ -20,6 +20,7 @@ const sapiBase = (process.env.SAPI_BASE_URL || 'https://sapi.nrun.ws/v1').replac
 const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVICE_TOKEN || '';
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
+const defaultTenantUid = process.env.ONE_DB_DEFAULT_TENANT_UID || '';
 const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken || '1db-private-preview';
 const publicDir = normalize(join(dirname(fileURLToPath(import.meta.url)), '..', 'public'));
 
@@ -166,7 +167,12 @@ function tenantUidFrom(req, url, body) {
 }
 
 function tenantUidFromRequest(req, url, body) {
-  return tenantUidFrom(req, url, body) || readSession(req)?.tenantUid || '';
+  const session = readSession(req);
+  return tenantUidFrom(req, url, body)
+    || session?.tenantUid
+    || (/^[0-9a-f-]{36}$/i.test(String(session?.tenantId || '')) ? session.tenantId : '')
+    || (session ? defaultTenantUid : '')
+    || '';
 }
 
 async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 15000 } = {}) {
