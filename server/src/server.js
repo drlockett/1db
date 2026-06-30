@@ -165,6 +165,10 @@ function tenantUidFrom(req, url, body) {
     || '';
 }
 
+function tenantUidFromRequest(req, url, body) {
+  return tenantUidFrom(req, url, body) || readSession(req)?.tenantUid || '';
+}
+
 async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 15000 } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -195,12 +199,12 @@ async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 1500
 
 async function proxyCognition(req, res, url, parts) {
   const { json: bodyJson } = await readBody(req);
-  const tenantUid = tenantUidFrom(req, url, bodyJson);
+  const tenantUid = tenantUidFromRequest(req, url, bodyJson);
   if (!tenantUid) {
     return json(res, 400, {
       error: {
         code: 'tenant_required',
-        message: 'Set X-NRun-Tenant-Uid, X-1db-Tenant-Uid, tenantUid query, or tenantUid body value.'
+        message: 'Sign in to use tenant-scoped cognition routes.'
       }
     });
   }
@@ -223,12 +227,12 @@ async function proxyCognition(req, res, url, parts) {
 
 async function proxyProjectCognition(req, res, url, parts) {
   const { json: bodyJson } = await readBody(req);
-  const tenantUid = tenantUidFrom(req, url, bodyJson);
+  const tenantUid = tenantUidFromRequest(req, url, bodyJson);
   if (!tenantUid) {
     return json(res, 400, {
       error: {
         code: 'tenant_required',
-        message: 'Set X-NRun-Tenant-Uid, X-1db-Tenant-Uid, tenantUid query, or tenantUid body value.'
+        message: 'Sign in to use tenant-scoped cognition routes.'
       }
     });
   }

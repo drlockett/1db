@@ -174,7 +174,6 @@ export function waitlistThanksPage() {
 export function adminPage(session) {
   const email = session?.email || 'Private preview account';
   const tenantId = session?.tenantId || 'tenant pending';
-  const tenantUid = session?.tenantUid || (/^[0-9a-f-]{36}$/i.test(String(tenantId)) ? tenantId : '');
   const users = [
     ['You', email, 'Owner', 'Active'],
     ['Ops lead', 'ops@example.com', 'Admin', 'Invite ready'],
@@ -216,47 +215,26 @@ export function adminPage(session) {
   </section>
   <section id="cognition-graph" class="adminSection panelGrid">
     <article class="dataPanel">
-      <div class="toolbar"><div><p class="kicker">Memory graph</p><h2>Cognition Graph Query</h2></div><button class="smallBtn" type="button" onclick="cgSeed()">Seed graph</button></div>
-      <div class="queryGrid">
-        <label>Tenant UID <input id="cgTenant" value="${esc(tenantUid)}" placeholder="tenant uid"></label>
-        <label>Namespace <input id="cgNamespace" value="1db"></label>
-        <label>Concept or label <input id="cgConcept" value="cold" placeholder="cold, water, black ice"></label>
-        <label>Association or rule <input id="cgAssociation" value="water-high-cold-produces-ice" placeholder="association slug"></label>
-        <label>Session ID <input id="cgSession" placeholder="session id from inference"></label>
-        <label>Evidence ID <input id="cgEvidence" placeholder="evidence id"></label>
-      </div>
-      <label>Inference inputs <textarea id="cgInput" rows="4">water=1.0,cold=0.85</textarea></label>
-      <div class="buttonRow">
-        <button class="smallBtn subtleBtn" type="button" onclick="cgGraph()">Load graph</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgDecompose()">Decompose</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgConceptByLabel()">Find label</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgConcept()">Read concept</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgAssociation()">Read association</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgRule()">Read rule</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgInfer()">Infer</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgSessionRead()">Session</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgExplain()">Explain</button>
-        <button class="smallBtn subtleBtn" type="button" onclick="cgEvidenceRead()">Evidence</button>
-      </div>
+      <div class="toolbar"><div><p class="kicker">Memory graph</p><h2>Ask the Cognition Graph</h2></div><button class="smallBtn" type="button" onclick="cgSubmit()">Run</button></div>
+      <label>Query <input id="cgCommand" value="decompose cold" placeholder="decompose cold"></label>
       <p id="cgStatus" class="muted inlineStatus"></p>
     </article>
     <article class="dataPanel">
       <p class="kicker">Query result</p>
       <h2>Graph Response</h2>
       <div class="hintList">
-        <div class="hintChip"><strong>Low cold</strong><span class="monoTiny">water=1.0,cold=0.25</span></div>
-        <div class="hintChip"><strong>Freeze</strong><span class="monoTiny">water=1.0,cold=0.85</span></div>
-        <div class="hintChip"><strong>Road hazard</strong><span class="monoTiny">ice=1.0,oil=0.9,road=1.0</span></div>
-        <div class="hintChip"><strong>Steam</strong><span class="monoTiny">water=1.0,heat=0.9</span></div>
+        <div class="hintChip"><strong>Decompose</strong><span class="monoTiny">decompose cold</span></div>
+        <div class="hintChip"><strong>Infer</strong><span class="monoTiny">infer water=1,cold=.85</span></div>
+        <div class="hintChip"><strong>Find</strong><span class="monoTiny">find black ice</span></div>
+        <div class="hintChip"><strong>Explain</strong><span class="monoTiny">explain SESSION_ID</span></div>
       </div>
-      <pre class="resultPre"><code id="cgPreview">Choose a graph query.</code></pre>
+      <pre class="resultPre"><code id="cgPreview">Type a graph query.</code></pre>
     </article>
   </section>
   <section id="project-cognition" class="adminSection panelGrid">
     <article class="dataPanel">
       <div class="toolbar"><div><p class="kicker">Execution memory</p><h2>Project Cognition</h2></div><button class="smallBtn" type="button" onclick="saveProjectCognition()">Save version</button></div>
       <div class="grid">
-        <label>Tenant UID <input id="pcTenant" value="${esc(tenantUid)}" placeholder="tenant uid"></label>
         <label>Project key <input id="pcKey" value="project-alpha"></label>
         <label>Project name <input id="pcName" value="Project Alpha"></label>
         <label>Change reason <input id="pcReason" value="Initial operating context"></label>
@@ -329,24 +307,35 @@ function adminCognitionGraphJs() {
   return `
 const cg = id => document.getElementById(id);
 const cgValue = id => cg(id).value.trim();
-const cgHeaders = () => ({'content-type':'application/json','x-nrun-tenant-uid':cgValue('cgTenant')});
-function cgJson(data) {
+const cgHeaders = () => ({'content-type':'application/json'});
+function cgJson(data, intent = '') {
+  if (intent === 'decompose' && data?.concept) {
+    const parts = [...new Set((data.associations || []).flatMap(item => item.targetConcepts || []))];
+    cg('cgPreview').textContent = (data.concept.canonicalLabel || 'Concept')+' decomposes into:\\n'+parts.map(part => '- '+part).join('\\n');
+    return;
+  }
+  if (intent === 'infer' && data?.outputActivations) {
+    const outputs = Object.entries(data.outputActivations).map(([key, value]) => '- '+key+': '+value).join('\\n');
+    const trace = (data.explanationTrace || []).map(item => '- '+item).join('\\n');
+    cg('cgPreview').textContent = 'Outputs:\\n'+outputs+(trace ? '\\n\\nTrace:\\n'+trace : '');
+    return;
+  }
   cg('cgPreview').textContent = JSON.stringify(data, null, 2);
 }
 function cgSetStatus(message) {
   cg('cgStatus').textContent = message;
 }
-async function cgFetch(path, options = {}) {
+async function cgFetch(path, options = {}, intent = '') {
   cgSetStatus('Querying graph...');
-  const result = await fetch(path, {...options, headers:{...cgHeaders(), ...(options.headers||{})}});
+  const result = await fetch(path, {...options, credentials:'same-origin', headers:{...cgHeaders(), ...(options.headers||{})}});
   const data = await result.json().catch(() => ({}));
   if (!result.ok) throw new Error(data?.error?.message || data?.title || 'Graph query failed');
-  cgJson(data);
+  cgJson(data, intent);
   cgSetStatus('Loaded at '+new Date().toLocaleTimeString()+'.');
   return data;
 }
-function cgParseInput() {
-  return Object.fromEntries(cgValue('cgInput').split(/[\\n,]+/).map(part => part.trim()).filter(Boolean).map(part => {
+function cgParseInput(text) {
+  return Object.fromEntries(text.split(/[\\n, ]+/).map(part => part.trim()).filter(Boolean).map(part => {
     const [key, value] = part.split('=').map(v => v.trim());
     return [key, Number(value)];
   }).filter(([key, value]) => key && Number.isFinite(value)));
@@ -355,52 +344,65 @@ async function cgRun(action) {
   try { return await action(); } catch (error) { cgSetStatus(error.message); }
 }
 function cgNamespaceQuery() {
-  return '?namespace='+encodeURIComponent(cgValue('cgNamespace') || '1db');
+  return '?namespace=1db';
 }
-function cgGraph() {
-  return cgRun(() => cgFetch('/api/v1/cognition/graph'+cgNamespaceQuery()));
+function cgCleanTerm(value) {
+  return value.replace(/^["']|["']$/g, '').trim();
 }
-function cgSeed() {
-  return cgRun(() => cgFetch('/api/v1/cognition/seed', {method:'POST', body:JSON.stringify({namespace:cgValue('cgNamespace') || '1db', word:cgValue('cgConcept') || 'cold'})}));
-}
-function cgDecompose() {
-  return cgRun(() => cgFetch('/api/v1/cognition/decompose/'+encodeURIComponent(cgValue('cgConcept') || 'cold')+cgNamespaceQuery()));
-}
-function cgConceptByLabel() {
-  return cgRun(() => cgFetch('/api/v1/cognition/concepts/by-label/'+encodeURIComponent(cgValue('cgConcept') || 'cold')+cgNamespaceQuery()));
-}
-function cgConcept() {
-  return cgRun(() => cgFetch('/api/v1/cognition/concepts/'+encodeURIComponent(cgValue('cgConcept') || 'cold')+cgNamespaceQuery()));
-}
-function cgAssociation() {
-  return cgRun(() => cgFetch('/api/v1/cognition/associations/'+encodeURIComponent(cgValue('cgAssociation'))+cgNamespaceQuery()));
-}
-function cgRule() {
-  return cgRun(() => cgFetch('/api/v1/cognition/rules/'+encodeURIComponent(cgValue('cgAssociation'))+cgNamespaceQuery()));
-}
-async function cgInfer() {
+function cgSubmit() {
   return cgRun(async () => {
-    const data = await cgFetch('/api/v1/cognition/infer', {method:'POST', body:JSON.stringify({namespace:cgValue('cgNamespace') || '1db', input:cgParseInput()})});
-    if (data?.id) cg('cgSession').value = data.id;
-    return data;
+    const raw = cgValue('cgCommand');
+    const normalized = raw.toLowerCase().trim();
+    if (!normalized) throw new Error('Type a graph query.');
+    const [verb, ...rest] = normalized.split(/\\s+/);
+    const term = cgCleanTerm(raw.split(/\\s+/).slice(1).join(' '));
+    if (normalized === 'graph' || normalized === 'load graph') {
+      return cgFetch('/api/v1/cognition/graph'+cgNamespaceQuery());
+    }
+    if (verb === 'seed') {
+      return cgFetch('/api/v1/cognition/seed', {method:'POST', body:JSON.stringify({namespace:'1db', word:cgCleanTerm(rest.join(' ')) || 'cold'})});
+    }
+    if (verb === 'infer' || raw.includes('=')) {
+      const inputText = verb === 'infer' ? raw.replace(/^infer\\s+/i, '') : raw;
+      return cgFetch('/api/v1/cognition/infer', {method:'POST', body:JSON.stringify({namespace:'1db', input:cgParseInput(inputText)})}, 'infer');
+    }
+    if (verb === 'find' || verb === 'lookup') {
+      return cgFetch('/api/v1/cognition/concepts/by-label/'+encodeURIComponent(term || rest.join(' '))+cgNamespaceQuery());
+    }
+    if (verb === 'concept') {
+      return cgFetch('/api/v1/cognition/concepts/'+encodeURIComponent(term)+cgNamespaceQuery());
+    }
+    if (verb === 'association') {
+      return cgFetch('/api/v1/cognition/associations/'+encodeURIComponent(term)+cgNamespaceQuery());
+    }
+    if (verb === 'rule') {
+      return cgFetch('/api/v1/cognition/rules/'+encodeURIComponent(term)+cgNamespaceQuery());
+    }
+    if (verb === 'session') {
+      return cgFetch('/api/v1/cognition/sessions/'+encodeURIComponent(term)+cgNamespaceQuery());
+    }
+    if (verb === 'explain') {
+      return cgFetch('/api/v1/cognition/sessions/'+encodeURIComponent(term)+'/explanation'+cgNamespaceQuery());
+    }
+    if (verb === 'evidence') {
+      return cgFetch('/api/v1/cognition/evidence/'+encodeURIComponent(term)+cgNamespaceQuery());
+    }
+    const concept = verb === 'decompose' ? term : raw;
+    return cgFetch('/api/v1/cognition/decompose/'+encodeURIComponent(cgCleanTerm(concept || 'cold'))+cgNamespaceQuery(), {}, 'decompose');
   });
 }
-function cgSessionRead() {
-  return cgRun(() => cgFetch('/api/v1/cognition/sessions/'+encodeURIComponent(cgValue('cgSession'))+cgNamespaceQuery()));
-}
-function cgExplain() {
-  return cgRun(() => cgFetch('/api/v1/cognition/sessions/'+encodeURIComponent(cgValue('cgSession'))+'/explanation'+cgNamespaceQuery()));
-}
-function cgEvidenceRead() {
-  return cgRun(() => cgFetch('/api/v1/cognition/evidence/'+encodeURIComponent(cgValue('cgEvidence'))+cgNamespaceQuery()));
-}
-setTimeout(() => { if (cgValue('cgTenant')) cgGraph(); }, 200);`;
+cg('cgCommand')?.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    cgSubmit();
+  }
+});`;
 }
 
 function adminProjectCognitionJs() {
   return `
 const lines = id => document.getElementById(id).value.split(/\\n+/).map(v => v.trim()).filter(Boolean);
-const pcHeaders = () => ({'content-type':'application/json','x-nrun-tenant-uid':document.getElementById('pcTenant').value.trim()});
+const pcHeaders = () => ({'content-type':'application/json'});
 async function pcFetch(path, options = {}) {
   const result = await fetch(path, {...options, headers:{...pcHeaders(), ...(options.headers||{})}});
   const data = await result.json().catch(() => ({}));
