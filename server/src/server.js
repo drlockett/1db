@@ -330,6 +330,11 @@ const server = createServer(async (req, res) => {
         canonicalTenantHeader: 'X-NRun-Tenant-Uid',
         cognitiveRoutes: [
           '/1db/cognition',
+          '/1db/cognition/cam',
+          '/api/v1/cam',
+          '/api/v1/cam/associations',
+          '/api/v1/cam/observe',
+          '/api/v1/cam/reinforce/{associationId}',
           '/1db/cognition/concepts/{conceptId}',
           '/1db/cognition/concepts/by-label/{label}',
           '/1db/cognition/associations/{associationId}',
@@ -341,6 +346,10 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/context/retrieve',
           '/api/v1/cognition/context/packets/{packetUid}',
           '/api/v1/cognition/graph',
+          '/api/v1/cognition/cam',
+          '/api/v1/cognition/cam/associations',
+          '/api/v1/cognition/cam/observe',
+          '/api/v1/cognition/cam/reinforce/{associationId}',
           '/api/v1/cognition/stats',
           '/api/v1/cognition/seed',
           '/api/v1/cognition/concepts/{conceptId}',
@@ -371,6 +380,9 @@ const server = createServer(async (req, res) => {
     }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cognition') {
       return proxyCognition(req, res, url, parts.slice(3));
+    }
+    if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cam') {
+      return proxyCognition(req, res, url, ['cam', ...parts.slice(3)]);
     }
     if (parts[0] === '1db' && parts[1] === 'cognition') {
       const cognitionParts = parts.length === 2 ? ['graph'] : parts.slice(2);

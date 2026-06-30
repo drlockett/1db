@@ -226,7 +226,9 @@ export function adminPage(session) {
         <div class="hintChip"><strong>Decompose</strong><span class="monoTiny">decompose cold</span></div>
         <div class="hintChip"><strong>Seed lexicon</strong><span class="monoTiny">seed lexicon 1000</span></div>
         <div class="hintChip"><strong>Count</strong><span class="monoTiny">count concepts</span></div>
+        <div class="hintChip"><strong>CAM</strong><span class="monoTiny">cam</span></div>
         <div class="hintChip"><strong>Find</strong><span class="monoTiny">find black ice</span></div>
+        <div class="hintChip"><strong>Associate</strong><span class="monoTiny">associate Game of Thrones | is_a | TV Series</span></div>
         <div class="hintChip"><strong>Infer</strong><span class="monoTiny">infer water=1,cold=.85</span></div>
       </div>
       <pre class="resultPre"><code id="cgPreview">Type a graph query.</code></pre>
@@ -344,6 +346,24 @@ function cgJson(data, intent = '') {
       +Object.entries(data.conceptsByPartOfSpeech).map(([key, value]) => '- '+key+': '+value).join('\\n');
     return;
   }
+  if (intent === 'cam' && data?.model) {
+    cg('cgPreview').textContent = 'Model: '+data.model+'\\nCanonical layer: '+data.canonicalLayer+'\\nRoot: '+data.rootPath+'\\n\\n'
+      +'Objects:\\n'+(data.objectTypes || []).map(item => '- '+item).join('\\n')+'\\n\\n'
+      +'Engines:\\n'+(data.engines || []).map(item => '- '+item).join('\\n')+'\\n\\n'
+      +'Relation types:\\n'+(data.supportedRelationTypes || []).join(', ');
+    return;
+  }
+  if (intent === 'associate' && data?.associationType) {
+    cg('cgPreview').textContent = 'CAM association vertex\\n'
+      +'Relation: '+data.relationLabel+'\\n'
+      +'Source: '+(data.sourceConcepts || []).join(', ')+'\\n'
+      +'Target: '+(data.targetConcepts || []).join(', ')+'\\n'
+      +'Strength: '+data.strength+'\\n'
+      +'Confidence: '+data.confidence+'\\n'
+      +'Layer: '+(data.tenantId ? 'tenant' : 'global')+'\\n'
+      +'Path: '+data.vertexPath;
+    return;
+  }
   cg('cgPreview').textContent = JSON.stringify(data, null, 2);
 }
 function cgSetStatus(message) {
@@ -385,6 +405,14 @@ function cgSubmit() {
     }
     if (verb === 'count' || verb === 'stats' || normalized === 'count concepts') {
       return cgFetch('/api/v1/cognition/stats', {}, 'stats');
+    }
+    if (verb === 'cam') {
+      return cgFetch('/api/v1/cam', {}, 'cam');
+    }
+    if (verb === 'associate' || verb === 'relate') {
+      const [source, relationType, target] = raw.replace(/^\\S+\\s+/i, '').split('|').map(value => value.trim());
+      if (!source || !relationType || !target) throw new Error('Use: associate source | relation_type | target');
+      return cgFetch('/api/v1/cam/associations', {method:'POST', body:JSON.stringify({source, relationType, target})}, 'associate');
     }
     if (verb === 'seed') {
       const text = rest.join(' ');
@@ -556,6 +584,11 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
       '/api/v1/cognition/context/retrieve': { post: { summary: 'Retrieve a durable context packet.' } },
       '/api/v1/cognition/context/packets/{packetUid}': { get: { summary: 'Read a previously created context packet.' } },
       '/api/v1/cognition/graph': { get: { summary: 'Read the 1DB base cognition graph root.' } },
+      '/api/v1/cam': { get: { summary: 'Read the CAM manifest, layers, engines, relation types, and live counts.' } },
+      '/api/v1/cam/associations': { post: { summary: 'Create or reinforce a tenant-layer CAM association vertex.' } },
+      '/api/v1/cam/observe': { post: { summary: 'Record a tenant-layer CAM observation and optional association.' } },
+      '/api/v1/cam/reinforce/{associationId}': { post: { summary: 'Reinforce a tenant-layer CAM association vertex.' } },
+      '/api/v1/cognition/cam': { get: { summary: 'Read the CAM manifest through the cognition route namespace.' } },
       '/api/v1/cognition/stats': { get: { summary: 'Read cognition graph concept and association counts.' } },
       '/api/v1/cognition/seed': { post: { summary: 'Run the base cognition graph seeder.' } },
       '/api/v1/cognition/concepts/{conceptId}': { get: { summary: 'Read a cognition concept vertex.' } },
