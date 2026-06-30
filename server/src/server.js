@@ -137,6 +137,7 @@ function sessionCookie(account) {
   const payload = {
     accountId: account.id || account.Id,
     tenantId: account.tenantId || account.TenantId,
+    tenantUid: account.tenantUid || account.TenantUid || account.tenant?.uid || account.Tenant?.Uid || '',
     email: account.email || account.Email || account.userName || account.UserName || '',
     expires: Date.now() + 8 * 60 * 60 * 1000
   };
