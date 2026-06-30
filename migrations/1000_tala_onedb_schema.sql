@@ -161,38 +161,6 @@ BEGIN
 END;
 GO
 
-IF OBJECT_ID(N'onedb.CognitiveEdges', N'U') IS NULL
-BEGIN
-    CREATE TABLE onedb.CognitiveEdges
-    (
-        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitiveEdges PRIMARY KEY,
-        EdgeUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_EdgeUid DEFAULT NEWID(),
-        TenantId BIGINT NOT NULL,
-        FromNodeId NVARCHAR(256) NOT NULL,
-        ToNodeId NVARCHAR(256) NOT NULL,
-        FromNodeType NVARCHAR(64) NOT NULL,
-        ToNodeType NVARCHAR(64) NOT NULL,
-        EdgeType NVARCHAR(96) NOT NULL,
-        Confidence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_Confidence DEFAULT 0.5,
-        Weight DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_Weight DEFAULT 0.5,
-        EvidenceEventUidsJson NVARCHAR(MAX) NULL,
-        MemoryUidsJson NVARCHAR(MAX) NULL,
-        Status NVARCHAR(32) NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_Status DEFAULT N'active',
-        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_CreatedUtc DEFAULT SYSUTCDATETIME(),
-        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitiveEdges_UpdatedUtc DEFAULT SYSUTCDATETIME(),
-        CONSTRAINT FK_OneDb_CognitiveEdges_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id)
-    );
-END;
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitiveEdges') AND name = N'IX_OneDb_CognitiveEdges_From')
-    CREATE INDEX IX_OneDb_CognitiveEdges_From ON onedb.CognitiveEdges(TenantId, FromNodeId, EdgeType);
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitiveEdges') AND name = N'IX_OneDb_CognitiveEdges_To')
-    CREATE INDEX IX_OneDb_CognitiveEdges_To ON onedb.CognitiveEdges(TenantId, ToNodeId, EdgeType);
-GO
-
 IF OBJECT_ID(N'onedb.ContinuityStates', N'U') IS NULL
 BEGIN
     CREATE TABLE onedb.ContinuityStates
@@ -241,6 +209,273 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.ContextPackets') AND name = N'IX_OneDb_ContextPackets_Tenant_Project')
     CREATE INDEX IX_OneDb_ContextPackets_Tenant_Project ON onedb.ContextPackets(TenantId, ProjectId, CreatedUtc DESC);
+GO
+
+IF OBJECT_ID(N'onedb.CognitionGraphs', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionGraphs
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionGraphs PRIMARY KEY,
+        GraphUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionGraphs_GraphUid DEFAULT NEWID(),
+        GraphId NVARCHAR(256) NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        RootVertexPath NVARCHAR(512) NOT NULL,
+        RootUrl NVARCHAR(1000) NOT NULL,
+        Description NVARCHAR(MAX) NOT NULL,
+        CreatedBy NVARCHAR(256) NOT NULL,
+        Version INT NOT NULL CONSTRAINT DF_OneDb_CognitionGraphs_Version DEFAULT 1,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionGraphs_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionGraphs_UpdatedUtc DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionGraphs') AND name = N'UX_OneDb_CognitionGraphs_GraphId')
+    CREATE UNIQUE INDEX UX_OneDb_CognitionGraphs_GraphId ON onedb.CognitionGraphs(GraphId);
+GO
+
+IF OBJECT_ID(N'onedb.CognitionConcepts', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionConcepts
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionConcepts PRIMARY KEY,
+        ConceptUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_ConceptUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        VertexPath NVARCHAR(512) NOT NULL,
+        CanonicalLabel NVARCHAR(256) NOT NULL,
+        Slug NVARCHAR(256) NOT NULL,
+        AliasesJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_Aliases DEFAULT N'[]',
+        PartOfSpeech NVARCHAR(64) NOT NULL,
+        ConceptType NVARCHAR(96) NOT NULL,
+        Definition NVARCHAR(MAX) NOT NULL,
+        ShortDefinition NVARCHAR(1000) NOT NULL,
+        FramesJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_Frames DEFAULT N'[]',
+        PrimitiveStatus NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_PrimitiveStatus DEFAULT N'refinable',
+        DecompositionStatus NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_DecompositionStatus DEFAULT N'pending',
+        SeedStatus NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_SeedStatus DEFAULT N'seeded',
+        Confidence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_Confidence DEFAULT 0.840000,
+        SourceRefsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_SourceRefs DEFAULT N'[]',
+        CreatedBy NVARCHAR(256) NOT NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_UpdatedUtc DEFAULT SYSUTCDATETIME(),
+        Version INT NOT NULL CONSTRAINT DF_OneDb_CognitionConcepts_Version DEFAULT 1,
+        Nid AS (CONVERT(NVARCHAR(400), N'nid:' + Namespace + N':cognition:concept:' + Slug)) PERSISTED,
+        Nrn AS (CONVERT(NVARCHAR(500), N'nrn:nodevertex:' + Namespace + N':cognition:concept:' + Slug)) PERSISTED,
+        Url AS (CONVERT(NVARCHAR(1000), N'https://nodevertex.com' + VertexPath)) PERSISTED,
+        CONSTRAINT FK_OneDb_CognitionConcepts_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionConcepts_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionConcepts') AND name = N'UX_OneDb_CognitionConcepts_Uid')
+    CREATE UNIQUE INDEX UX_OneDb_CognitionConcepts_Uid ON onedb.CognitionConcepts(ConceptUid);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionConcepts') AND name = N'UX_OneDb_CognitionConcepts_BaseSlug')
+    CREATE UNIQUE INDEX UX_OneDb_CognitionConcepts_BaseSlug ON onedb.CognitionConcepts(Namespace, BaseGraphId, Slug) WHERE TenantId IS NULL;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionAssociations', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionAssociations
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionAssociations PRIMARY KEY,
+        AssociationUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_AssociationUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        VertexPath NVARCHAR(512) NOT NULL,
+        Slug NVARCHAR(512) NOT NULL,
+        AssociationType NVARCHAR(96) NOT NULL,
+        SourceConceptIdsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_SourceIds DEFAULT N'[]',
+        SourceConceptSlugsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_SourceSlugs DEFAULT N'[]',
+        TargetConceptIdsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_TargetIds DEFAULT N'[]',
+        TargetConceptSlugsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_TargetSlugs DEFAULT N'[]',
+        RelationLabel NVARCHAR(128) NOT NULL,
+        Strength DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Strength DEFAULT 0.500000,
+        Confidence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Confidence DEFAULT 0.500000,
+        Context NVARCHAR(128) NULL,
+        Frame NVARCHAR(128) NULL,
+        EvidenceRefsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_EvidenceRefs DEFAULT N'[]',
+        Directionality NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Directionality DEFAULT N'directed',
+        Reversibility BIT NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Reversibility DEFAULT 0,
+        ObservedCount INT NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_ObservedCount DEFAULT 1,
+        LastObservedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_LastObserved DEFAULT SYSUTCDATETIME(),
+        RuleJson NVARCHAR(MAX) NULL,
+        CreatedBy NVARCHAR(256) NOT NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_UpdatedUtc DEFAULT SYSUTCDATETIME(),
+        Version INT NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Version DEFAULT 1,
+        Nid AS (CONVERT(NVARCHAR(700), N'nid:' + Namespace + N':cognition:association:' + Slug)) PERSISTED,
+        Nrn AS (CONVERT(NVARCHAR(800), N'nrn:nodevertex:' + Namespace + N':cognition:association:' + Slug)) PERSISTED,
+        Url AS (CONVERT(NVARCHAR(1000), N'https://nodevertex.com' + VertexPath)) PERSISTED,
+        CONSTRAINT FK_OneDb_CognitionAssociations_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionAssociations_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionAssociations') AND name = N'UX_OneDb_CognitionAssociations_Uid')
+    CREATE UNIQUE INDEX UX_OneDb_CognitionAssociations_Uid ON onedb.CognitionAssociations(AssociationUid);
+GO
+
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionAssociations') AND name = N'UX_OneDb_CognitionAssociations_BaseSlug')
+    DROP INDEX UX_OneDb_CognitionAssociations_BaseSlug ON onedb.CognitionAssociations;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'SlugHash') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD SlugHash AS (CONVERT(BINARY(32), HASHBYTES('SHA2_256', Slug))) PERSISTED;
+GO
+
+CREATE UNIQUE INDEX UX_OneDb_CognitionAssociations_BaseSlug ON onedb.CognitionAssociations(Namespace, BaseGraphId, SlugHash) WHERE TenantId IS NULL;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionAssociationInputs', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionAssociationInputs
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionAssociationInputs PRIMARY KEY,
+        AssociationUid UNIQUEIDENTIFIER NOT NULL,
+        ConceptUid UNIQUEIDENTIFIER NOT NULL,
+        InputRole NVARCHAR(64) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociationInputs_Role DEFAULT N'input',
+        Weight DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociationInputs_Weight DEFAULT 1,
+        MinActivation DECIMAL(9,6) NULL,
+        IdealActivation DECIMAL(9,6) NULL,
+        MaxActivation DECIMAL(9,6) NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociationInputs_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_OneDb_CognitionAssociationInputs_Association FOREIGN KEY (AssociationUid) REFERENCES onedb.CognitionAssociations(AssociationUid),
+        CONSTRAINT FK_OneDb_CognitionAssociationInputs_Concept FOREIGN KEY (ConceptUid) REFERENCES onedb.CognitionConcepts(ConceptUid)
+    );
+END;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionSessions', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionSessions
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionSessions PRIMARY KEY,
+        SessionUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionSessions_SessionUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        VertexPath NVARCHAR(512) NOT NULL,
+        SessionType NVARCHAR(96) NOT NULL,
+        InputActivationsJson NVARCHAR(MAX) NOT NULL,
+        ActivatedVerticesJson NVARCHAR(MAX) NOT NULL,
+        CandidateAssociationsJson NVARCHAR(MAX) NOT NULL,
+        OutputActivationsJson NVARCHAR(MAX) NOT NULL,
+        ExplanationTraceJson NVARCHAR(MAX) NOT NULL,
+        Status NVARCHAR(64) NOT NULL,
+        StartedUtc DATETIME2(3) NOT NULL,
+        CompletedUtc DATETIME2(3) NULL,
+        Ttl NVARCHAR(64) NULL,
+        CreatedBy NVARCHAR(256) NOT NULL,
+        Url AS (CONVERT(NVARCHAR(1000), N'https://nodevertex.com' + VertexPath)) PERSISTED,
+        CONSTRAINT FK_OneDb_CognitionSessions_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionSessions_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionSessions') AND name = N'UX_OneDb_CognitionSessions_Uid')
+    CREATE UNIQUE INDEX UX_OneDb_CognitionSessions_Uid ON onedb.CognitionSessions(SessionUid);
+GO
+
+IF OBJECT_ID(N'onedb.CognitionSeedJobs', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionSeedJobs
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionSeedJobs PRIMARY KEY,
+        JobUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionSeedJobs_JobUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        JobType NVARCHAR(96) NOT NULL,
+        Status NVARCHAR(64) NOT NULL,
+        RequestJson NVARCHAR(MAX) NOT NULL,
+        ResultJson NVARCHAR(MAX) NOT NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionSeedJobs_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        UpdatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionSeedJobs_UpdatedUtc DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_OneDb_CognitionSeedJobs_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionSeedJobs_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionEvidence', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionEvidence
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionEvidence PRIMARY KEY,
+        EvidenceUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionEvidence_EvidenceUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        SourceName NVARCHAR(256) NOT NULL,
+        SourceType NVARCHAR(96) NOT NULL,
+        SourceUri NVARCHAR(1000) NULL,
+        License NVARCHAR(256) NULL,
+        ExtractionMethod NVARCHAR(128) NOT NULL,
+        ExtractedUtc DATETIME2(3) NOT NULL,
+        Confidence DECIMAL(9,6) NOT NULL,
+        RawPayloadJson NVARCHAR(MAX) NOT NULL,
+        NormalizedPayloadJson NVARCHAR(MAX) NOT NULL,
+        RelatedVertexPath NVARCHAR(512) NULL,
+        RelatedNrn NVARCHAR(800) NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionEvidence_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_OneDb_CognitionEvidence_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionEvidence_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionObservations', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionObservations
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionObservations PRIMARY KEY,
+        ObservationUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionObservations_ObservationUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        InputJson NVARCHAR(MAX) NOT NULL,
+        ObservedResult NVARCHAR(256) NULL,
+        Confidence DECIMAL(9,6) NOT NULL,
+        Source NVARCHAR(128) NOT NULL,
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionObservations_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_OneDb_CognitionObservations_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionObservations_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
+GO
+
+IF OBJECT_ID(N'onedb.CognitionQualityMetrics', N'U') IS NULL
+BEGIN
+    CREATE TABLE onedb.CognitionQualityMetrics
+    (
+        Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_CognitionQualityMetrics PRIMARY KEY,
+        MetricUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_CognitionQualityMetrics_MetricUid DEFAULT NEWID(),
+        TenantId BIGINT NULL,
+        ApplicationId BIGINT NOT NULL,
+        Namespace NVARCHAR(128) NOT NULL,
+        BaseGraphId NVARCHAR(256) NOT NULL,
+        MetricName NVARCHAR(128) NOT NULL,
+        MetricValue DECIMAL(18,6) NOT NULL,
+        DetailJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionQualityMetrics_Detail DEFAULT N'{}',
+        CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionQualityMetrics_CreatedUtc DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_OneDb_CognitionQualityMetrics_Tenants FOREIGN KEY (TenantId) REFERENCES security.Tenants(Id),
+        CONSTRAINT FK_OneDb_CognitionQualityMetrics_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
+    );
+END;
 GO
 
 IF OBJECT_ID(N'onedb.ProjectCognition', N'U') IS NULL
@@ -337,10 +572,6 @@ IF COL_LENGTH(N'onedb.StoreBackends', N'Notes') IS NULL
     ALTER TABLE onedb.StoreBackends ADD Notes NVARCHAR(1000) NULL;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.StoreBackends') AND name = N'IX_OneDb_StoreBackends_Role')
-    CREATE INDEX IX_OneDb_StoreBackends_Role ON onedb.StoreBackends(TenantId, BackendRole, IsEnabled, Priority);
-GO
-
 MERGE onedb.StoreBackends AS target
 USING
 (
@@ -349,13 +580,13 @@ USING
            N'Canonical 1db control ledger in SQL Server Nrun.' AS Notes
     UNION ALL SELECT NULL, N'document', N'onedb-mongo', N'mongodb', 40, N'provisioned',
            N'{"operations":["payload-documents","memory-documents","context-packet-documents","session-snapshots"],"read":true,"write":true,"service":"onedb-mongo.nrun-platform.svc.cluster.local:27017","secret":"onedb-mongo-secrets"}',
-           N'Kubernetes MongoDB document backend is provisioned; TALA provider client probes and document writes mark it operational when reachable.'
+           N'Kubernetes MongoDB document backend is provisioned; TALA provider client wiring is next.'
     UNION ALL SELECT NULL, N'event-object', N'pending-object-store', N'object-store', 100, N'planned',
            N'{"operations":["raw-events","transcripts","large-artifacts","exports"],"read":true,"write":true}',
            N'Planned object/N2/R2-compatible event artifact store.'
     UNION ALL SELECT NULL, N'vector', N'onedb-qdrant', N'qdrant', 100, N'provisioned',
            N'{"operations":["embedding-write","semantic-recall","nearest-neighbor"],"read":true,"write":true,"service":"onedb-qdrant.nrun-platform.svc.cluster.local:6333","secret":"onedb-qdrant-secrets"}',
-           N'Kubernetes Qdrant vector backend is provisioned; TALA provider client probes and vector writes mark it operational when reachable.'
+           N'Kubernetes Qdrant vector backend is provisioned; TALA provider client wiring is next.'
     UNION ALL SELECT NULL, N'graph', N'sqlserver-edge-table', N'sqlserver', 50, N'operational',
            N'{"operations":["relationship-ledger","graph-neighborhood","causality"],"read":true,"write":true}',
            N'Initial graph role backed by SQL Server edge tables.'
@@ -364,7 +595,7 @@ USING
            N'Initial lexical retrieval over SQL Server memory text.'
     UNION ALL SELECT NULL, N'hot-cache', N'velo-redis', N'redis', 50, N'provisioned',
            N'{"operations":["active-context-cache","queue-locks","short-lived-packets"],"read":true,"write":true,"service":"velo-redis.nrun-platform.svc.cluster.local:6379"}',
-           N'VELO/Redis cache role is provisioned for hot cognition paths and marked operational when reachable.'
+           N'VELO/Redis cache role is provisioned for hot cognition paths; TALA provider client wiring is next.'
     UNION ALL SELECT NULL, N'notebook', N'onedb-jupyter', N'jupyter', 200, N'provisioned',
            N'{"operations":["memory-quality-analysis","embedding-evaluation","consolidation-research","drift-analysis"],"read":true,"write":false,"service":"onedb-jupyter.nrun-platform.svc.cluster.local:8888","secret":"onedb-jupyter-secrets"}',
            N'Kubernetes Jupyter workbench is provisioned as an internal research path; not a serving path.'
@@ -386,13 +617,4 @@ SET IsEnabled = 0,
 WHERE TenantId IS NULL
   AND BackendRole IN (N'document', N'vector', N'notebook')
   AND ProviderKey IN (N'mongodb-planned', N'pending-vector-store', N'jupyter-planned');
-GO
-
-SELECT Id, Code, Name, BaseUrl, IsActive
-FROM client.Applications
-WHERE Code = N'1db';
-
-SELECT BackendRole, ProviderKey, IsEnabled, Priority
-FROM onedb.StoreBackends
-ORDER BY BackendRole, Priority;
 GO

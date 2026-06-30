@@ -317,9 +317,29 @@ const server = createServer(async (req, res) => {
         storagePolicy: 'Managed persistence',
         canonicalTenantHeader: 'X-NRun-Tenant-Uid',
         cognitiveRoutes: [
+          '/1db/cognition',
+          '/1db/cognition/concepts/{conceptId}',
+          '/1db/cognition/concepts/by-label/{label}',
+          '/1db/cognition/associations/{associationId}',
+          '/1db/cognition/decompose/{conceptId}',
+          '/1db/cognition/rules/{ruleId}',
+          '/1db/cognition/sessions/{sessionId}',
+          '/1db/cognition/infer',
           '/api/v1/cognition/events',
           '/api/v1/cognition/context/retrieve',
           '/api/v1/cognition/context/packets/{packetUid}',
+          '/api/v1/cognition/graph',
+          '/api/v1/cognition/seed',
+          '/api/v1/cognition/concepts/{conceptId}',
+          '/api/v1/cognition/concepts/by-label/{label}',
+          '/api/v1/cognition/associations/{associationId}',
+          '/api/v1/cognition/decompose/{conceptId}',
+          '/api/v1/cognition/rules/{ruleId}',
+          '/api/v1/cognition/sessions/{sessionId}',
+          '/api/v1/cognition/infer',
+          '/api/v1/cognition/seed/jobs/{jobId}',
+          '/api/v1/cognition/enrichment/jobs/{jobId}',
+          '/api/v1/cognition/evidence/{evidenceId}',
           '/api/v1/cognition/backends',
           '/api/v1/cognition/backends/plan',
           '/api/v1/cognition/projects/{projectId}/continuity',
@@ -338,6 +358,10 @@ const server = createServer(async (req, res) => {
     }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cognition') {
       return proxyCognition(req, res, url, parts.slice(3));
+    }
+    if (parts[0] === '1db' && parts[1] === 'cognition') {
+      const cognitionParts = parts.length === 2 ? ['graph'] : parts.slice(2);
+      return proxyCognition(req, res, url, cognitionParts);
     }
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) return html(res, 404, notFoundPage());
     return json(res, 404, { error: { code: 'not_found', message: 'No route matched.' } });
