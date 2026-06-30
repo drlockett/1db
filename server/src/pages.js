@@ -324,6 +324,25 @@ function cgJson(data, intent = '') {
         +'</a>'+(part.shortDefinition ? ' - '+cgEsc(part.shortDefinition) : '')).join('\\n');
     return;
   }
+  if (intent === 'query' && data?.concept) {
+    const associations = data.associations || [];
+    const related = data.relatedConcepts || [];
+    const lines = [
+      data.concept.canonicalLabel || data.query || 'Concept',
+      data.concept.shortDefinition || data.concept.definition || '',
+      '',
+      'Links:'
+    ];
+    if (related.length) {
+      lines.push(...related.map(part => '- '+(part.canonicalLabel || part.slug)+' ('+(part.partOfSpeech || 'concept')+')'+(part.shortDefinition ? ' - '+part.shortDefinition : '')));
+    } else if (associations.length) {
+      lines.push(...associations.map(item => '- '+(item.relationLabel || item.associationType)+': '+(item.targetConcepts || []).join(', ')));
+    } else {
+      lines.push('- No links yet. The enrichment engine has queued this concept for association discovery.');
+    }
+    cg('cgPreview').textContent = lines.filter((line, index) => index !== 1 || line).join('\\n');
+    return;
+  }
   if (intent === 'infer' && data?.outputActivations) {
     const outputs = Object.entries(data.outputActivations).map(([key, value]) => '- '+key+': '+value).join('\\n');
     const trace = (data.explanationTrace || []).map(item => '- '+item).join('\\n');
@@ -439,7 +458,7 @@ function cgSubmit() {
       return cgFetch('/api/v1/cognition/infer', {method:'POST', body:JSON.stringify({namespace:'1db', input:cgParseInput(inputText)})}, 'infer');
     }
     if (verb === 'find' || verb === 'lookup') {
-      return cgFetch('/api/v1/cognition/concepts/by-label/'+encodeURIComponent(term || rest.join(' '))+cgNamespaceQuery());
+      return cgFetch('/api/v1/cognition/query/'+encodeURIComponent(term || rest.join(' ')), {}, 'query');
     }
     if (verb === 'concept') {
       return cgFetch('/api/v1/cognition/concepts/'+encodeURIComponent(term)+cgNamespaceQuery());
@@ -459,8 +478,10 @@ function cgSubmit() {
     if (verb === 'evidence') {
       return cgFetch('/api/v1/cognition/evidence/'+encodeURIComponent(term)+cgNamespaceQuery());
     }
-    const concept = verb === 'decompose' ? term : raw;
-    return cgFetch('/api/v1/cognition/decompose/'+encodeURIComponent(cgCleanTerm(concept || 'cold'))+cgNamespaceQuery(), {}, 'decompose');
+    if (verb === 'decompose') {
+      return cgFetch('/api/v1/cognition/decompose/'+encodeURIComponent(cgCleanTerm(term || 'cold'))+cgNamespaceQuery(), {}, 'decompose');
+    }
+    return cgFetch('/api/v1/cognition/query/'+encodeURIComponent(cgCleanTerm(raw)), {}, 'query');
   });
 }
 cg('cgCommand')?.addEventListener('keydown', event => {
@@ -591,6 +612,7 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
       '/api/v1/cognition/cam': { get: { summary: 'Read the CAM manifest through the cognition route namespace.' } },
       '/api/v1/cognition/stats': { get: { summary: 'Read cognition graph concept and association counts.' } },
       '/api/v1/cognition/seed': { post: { summary: 'Run the base cognition graph seeder.' } },
+      '/api/v1/cognition/query/{query}': { get: { summary: 'Query a concept and return enriched association links.' } },
       '/api/v1/cognition/concepts/{conceptId}': { get: { summary: 'Read a cognition concept vertex.' } },
       '/api/v1/cognition/concepts/by-label/{label}': { get: { summary: 'Resolve a concept vertex by label.' } },
       '/api/v1/cognition/associations/{associationId}': { get: { summary: 'Read an association vertex.' } },

@@ -352,6 +352,7 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/cam/reinforce/{associationId}',
           '/api/v1/cognition/stats',
           '/api/v1/cognition/seed',
+          '/api/v1/cognition/query/{query}',
           '/api/v1/cognition/concepts/{conceptId}',
           '/api/v1/cognition/concepts/by-label/{label}',
           '/api/v1/cognition/associations/{associationId}',
