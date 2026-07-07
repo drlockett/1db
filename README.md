@@ -1,6 +1,8 @@
 # 1db.io
 
-1db.io is cognitive infrastructure for persistent memory, project-aware execution context, and agent continuity.
+1db.io is the semantic persistence layer for a communication fabric, converting communication events into durable cognition across memory, identity, relationships, trust, context, time, governance, and simulation.
+
+Node Vertex lets everything communicate. 1db lets the fabric remember what communication means.
 
 ## Local development
 

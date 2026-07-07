@@ -1,6 +1,14 @@
-# 1db Cognitive Persistence MVP
+# 1db Cognitive Persistence
 
-Phase 1 implements project cognitive continuity on the existing Cloudflare Worker + D1 stack.
+1db is the semantic persistence layer for the communication fabric. It observes communication events, converts meaningful activity into durable cognition, and compiles context for authorized agents at the moment of action.
+
+The current public runtime is the 1db platform server. Historical Cloudflare Worker and D1 notes below describe the original MVP path rather than the canonical production architecture.
+
+For the CFT-native product model, see [CFT Positioning](cft-positioning.md).
+
+## MVP lineage
+
+Phase 1 implemented project cognitive continuity on the original Cloudflare Worker + D1 stack.
 
 ## Flow
 
