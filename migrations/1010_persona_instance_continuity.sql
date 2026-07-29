@@ -11,7 +11,9 @@ BEGIN
     CREATE TABLE onedb.MemoryScopes
     (
         Id BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OneDb_MemoryScopes PRIMARY KEY,
-        ScopeUid UNIQUEIDENTIFIER NOT NULL CONSTRAINT DF_OneDb_MemoryScopes_Uid DEFAULT NEWSEQUENTIALID(),
+        ScopeUid UNIQUEIDENTIFIER NOT NULL
+            CONSTRAINT DF_OneDb_MemoryScopes_Uid DEFAULT NEWSEQUENTIALID()
+            CONSTRAINT UX_OneDb_MemoryScopes_Uid UNIQUE,
         TenantId BIGINT NOT NULL,
         ScopeType NVARCHAR(64) NOT NULL,
         ScopeId NVARCHAR(256) NOT NULL,
