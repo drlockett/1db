@@ -381,7 +381,13 @@ function cgJson(data, intent = '') {
       +'Source: '+(data.sourceConcepts || []).join(', ')+'\\n'
       +'Target: '+(data.targetConcepts || []).join(', ')+'\\n'
       +'Strength: '+data.strength+'\\n'
+      +'Relational yield: '+data.relationalYield+'\\n'
+      +'Trust: '+data.trust+'\\n'
       +'Confidence: '+data.confidence+'\\n'
+      +'Evidence: '+data.evidence+'\\n'
+      +'Persistence: '+data.persistence+'\\n'
+      +'Context similarity: '+data.contextSimilarity+'\\n'
+      +'Decay rate: '+data.decayRate+'\\n'
       +'Layer: '+(data.tenantId ? 'tenant' : 'global')+'\\n'
       +'Path: '+data.vertexPath;
     return;
@@ -609,9 +615,9 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
       '/api/v1/cognition/context/packets/{packetUid}': { get: { summary: 'Read a previously created context packet.' } },
       '/api/v1/cognition/graph': { get: { summary: 'Read the 1DB base cognition graph root.' } },
       '/api/v1/cam': { get: { summary: 'Read the CAM manifest, layers, engines, relation types, and live counts.' } },
-      '/api/v1/cam/associations': { post: { summary: 'Create or reinforce a tenant-layer CAM association vertex.' } },
+      '/api/v1/cam/associations': { post: { summary: 'Create or enrich a tenant-layer association with the CFT/CAM state vector.' } },
       '/api/v1/cam/observe': { post: { summary: 'Record a tenant-layer CAM observation and optional association.' } },
-      '/api/v1/cam/reinforce/{associationId}': { post: { summary: 'Reinforce a tenant-layer CAM association vertex.' } },
+      '/api/v1/cam/reinforce/{associationId}': { post: { summary: 'Strengthen or weaken a tenant-layer CFT/CAM association state.' } },
       '/api/v1/cognition/cam': { get: { summary: 'Read the CAM manifest through the cognition route namespace.' } },
       '/api/v1/cognition/stats': { get: { summary: 'Read cognition graph concept and association counts.' } },
       '/api/v1/cognition/seed': { post: { summary: 'Run the base cognition graph seeder.' } },
@@ -634,6 +640,8 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
       '/api/v1/cognition/backends': { get: { summary: 'List available cognition stores.' } },
       '/api/v1/cognition/backends/plan': { get: { summary: 'Plan a cognition operation.' } },
       '/api/v1/cognition/projects/{projectId}/continuity': { get: { summary: 'Read project continuity state.' } },
+      '/api/v1/cognition/continuity/{scopeType}/{scopeId}': { get: { summary: 'Read the versioned continuity head for a persona or organizational memory scope.' } },
+      '/api/v1/cognition/continuity/{scopeType}/{scopeId}/checkpoints': { post: { summary: 'Append an optimistic-concurrency continuity checkpoint and advance its head.' } },
       '/api/project-cognition': {
         get: { summary: 'List Project Cognition versions.' },
         post: { summary: 'Create a versioned Project Cognition record.' }

@@ -146,6 +146,8 @@ Already-shippable / core capabilities, based on current repo and docs:
 - Memory explanation, correction, and deprecation endpoints.
 - Backend discovery and route planning.
 - Cognition graph querying, concept lookup, association creation, observation, and reinforcement.
+- CFT/CAM association state vectors covering strength, relational yield, trust, confidence, evidence, persistence, context similarity, and decay.
+- Signed association reinforcement so new Communication Matter can strengthen or weaken cognitive state.
 - Reinforcement-aware retrieval and contradiction reporting hooks.
 - Tenant-scoped access patterns.
 
@@ -154,7 +156,7 @@ Near-term CFT-aligned enhancements:
 - Rename public concepts around `observe`, `remember`, `relate`, `compile`, and `reconstruct`.
 - Add first-class provenance envelopes to all observed events.
 - Add explicit recall scope to context compilation.
-- Expand relationship semantics beyond graph adjacency into permission, trust, dependency, and relevance.
+- Expand relationship semantics beyond the implemented CAM state vector into permission propagation and policy-aware traversal.
 - Add identity reinforcement and drift reports.
 - Add trust evaluation APIs for claims and memories.
 - Add temporal reconstruction for entities, projects, and decisions.

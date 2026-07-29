@@ -298,7 +298,13 @@ BEGIN
         TargetConceptSlugsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_TargetSlugs DEFAULT N'[]',
         RelationLabel NVARCHAR(128) NOT NULL,
         Strength DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Strength DEFAULT 0.500000,
+        RelationalYield DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_RelationalYield DEFAULT 0.000000,
+        Trust DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Trust DEFAULT 0.500000,
         Confidence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Confidence DEFAULT 0.500000,
+        EvidenceScore DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_EvidenceScore DEFAULT 0.500000,
+        Persistence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Persistence DEFAULT 0.500000,
+        ContextSimilarity DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_ContextSimilarity DEFAULT 0.500000,
+        DecayRate DECIMAL(12,9) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_DecayRate DEFAULT 0.000000000,
         Context NVARCHAR(128) NULL,
         Frame NVARCHAR(128) NULL,
         EvidenceRefsJson NVARCHAR(MAX) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_EvidenceRefs DEFAULT N'[]',
@@ -306,6 +312,7 @@ BEGIN
         Reversibility BIT NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Reversibility DEFAULT 0,
         ObservedCount INT NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_ObservedCount DEFAULT 1,
         LastObservedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_LastObserved DEFAULT SYSUTCDATETIME(),
+        LastReinforcedUtc DATETIME2(3) NULL,
         RuleJson NVARCHAR(MAX) NULL,
         CreatedBy NVARCHAR(256) NOT NULL,
         CreatedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_CreatedUtc DEFAULT SYSUTCDATETIME(),
@@ -318,6 +325,47 @@ BEGIN
         CONSTRAINT FK_OneDb_CognitionAssociations_Applications FOREIGN KEY (ApplicationId) REFERENCES client.Applications(Id)
     );
 END;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'RelationalYield') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD RelationalYield DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_RelationalYield DEFAULT 0.000000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'Trust') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD Trust DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Trust DEFAULT 0.500000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'EvidenceScore') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD EvidenceScore DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_EvidenceScore DEFAULT 0.500000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'Persistence') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD Persistence DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_Persistence DEFAULT 0.500000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'ContextSimilarity') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD ContextSimilarity DECIMAL(9,6) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_ContextSimilarity DEFAULT 0.500000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'DecayRate') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD DecayRate DECIMAL(12,9) NOT NULL CONSTRAINT DF_OneDb_CognitionAssociations_DecayRate DEFAULT 0.000000000;
+GO
+
+IF COL_LENGTH(N'onedb.CognitionAssociations', N'LastReinforcedUtc') IS NULL
+    ALTER TABLE onedb.CognitionAssociations ADD LastReinforcedUtc DATETIME2(3) NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_OneDb_CognitionAssociations_RelationalYield')
+    ALTER TABLE onedb.CognitionAssociations ADD CONSTRAINT CK_OneDb_CognitionAssociations_RelationalYield CHECK (RelationalYield BETWEEN -1 AND 1);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_OneDb_CognitionAssociations_CftUnitScores')
+    ALTER TABLE onedb.CognitionAssociations ADD CONSTRAINT CK_OneDb_CognitionAssociations_CftUnitScores
+        CHECK (Trust BETWEEN 0 AND 1 AND EvidenceScore BETWEEN 0 AND 1 AND Persistence BETWEEN 0 AND 1 AND ContextSimilarity BETWEEN 0 AND 1);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_OneDb_CognitionAssociations_DecayRate')
+    ALTER TABLE onedb.CognitionAssociations ADD CONSTRAINT CK_OneDb_CognitionAssociations_DecayRate CHECK (DecayRate >= 0);
 GO
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'onedb.CognitionAssociations') AND name = N'UX_OneDb_CognitionAssociations_Uid')

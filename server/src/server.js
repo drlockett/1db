@@ -366,6 +366,8 @@ const server = createServer(async (req, res) => {
           '/api/v1/cognition/backends',
           '/api/v1/cognition/backends/plan',
           '/api/v1/cognition/projects/{projectId}/continuity',
+          '/api/v1/cognition/continuity/{scopeType}/{scopeId}',
+          '/api/v1/cognition/continuity/{scopeType}/{scopeId}/checkpoints',
           '/api/project-cognition',
           '/api/project-cognition/{projectKey}',
           '/api/project-cognition/{projectKey}/active'

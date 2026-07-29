@@ -39,6 +39,23 @@ Raw interaction -> cognitive event -> rule-extracted memory candidates -> memory
 
 The Kubernetes runtime proxies 1db cognition through SAPI into TALA. Retrieval now persists context packets in `onedb.ContextPackets`, and backend discovery reads `onedb.StoreBackends` so tenants can see and route across daTALAke roles beyond SQL Server, including operational internal MongoDB document, Qdrant vector, Redis cache, and Jupyter notebook services.
 
+## CFT association enrichment
+
+Tenant associations are first-class Cognitive Association Model objects rather than unweighted CRM links. Each association persists the CFT state vector:
+
+- strength (`0..1`)
+- relational yield (`-1..1`)
+- trust (`0..1`)
+- confidence (`0..1`)
+- evidence (`0..1`)
+- persistence (`0..1`)
+- context similarity (`0..1`)
+- decay rate (`>= 0`)
+
+`POST /api/v1/cam/associations` creates or observes an association. `POST /api/v1/cam/reinforce/{associationId}` accepts signed deltas, so later Communication Matter can strengthen or weaken the relationship instead of only incrementing a counter. Every change updates observation and reinforcement time and writes evidence with the resulting state.
+
+NodeRunner CRM is an observation producer in this flow. It gathers Communication Matter and relationship signals, while 1db owns the durable, tenant-scoped cognitive state and its evolution. See [CFT association enrichment](cft-association-enrichment.md) for the integration contract.
+
 ## Phase 2 cognitive integrity additions
 
 Implemented after Phase 1 MVP:
