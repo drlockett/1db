@@ -17,6 +17,17 @@ npm run start:platform
 docker build -t one-db-platform-server .
 ```
 
+## Current cognition access
+
+The platform runtime requires a signed-in session, a canonical tenant application
+credential with `cognition:read` / `cognition:write`, or an existing trusted service
+credential. Tenant headers select context and never authenticate a caller. Read
+[portable collaboration continuity](docs/collaboration-continuity.md) for exact
+checkpoint provenance, scoped retrieval and resumable agent handoffs.
+
+The link/intake bootstrap examples below describe the historical Worker preview.
+Its tenant keys do not establish access to the current platform cognition service.
+
 ## API keys
 
 Tenant API keys are stored hashed only. Bootstrap tenant/key creation uses `ONE_DB_API_TOKEN`:

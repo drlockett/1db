@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { authorizeMemoryRequest, bindMemoryRequest, canReadMemoryPacket, MemoryAccessError } from './memory-access.js';
 import { readFile } from 'node:fs/promises';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,8 +21,7 @@ const sapiBase = (process.env.SAPI_BASE_URL || 'https://sapi.nrun.ws/v1').replac
 const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVICE_TOKEN || '';
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
-const defaultTenantUid = process.env.ONE_DB_DEFAULT_TENANT_UID || '';
-const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken || '1db-private-preview';
+const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken;
 const publicDir = normalize(join(dirname(fileURLToPath(import.meta.url)), '..', 'public'));
 
 const allowedOrigins = new Set([
@@ -37,7 +37,7 @@ function corsFor(req) {
     'access-control-allow-origin': allowOrigin,
     'vary': 'Origin',
     'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS,HEAD',
-    'access-control-allow-headers': 'content-type,authorization,x-api-key,x-nrun-tenant-uid,x-1db-tenant-uid,idempotency-key',
+    'access-control-allow-headers': 'content-type,authorization,x-api-key,x-nrun-tenant-uid,x-1db-tenant-uid,x-nrun-sapi-token,idempotency-key',
     'access-control-allow-credentials': 'true'
   };
 }
@@ -113,13 +113,16 @@ function parseCookies(req) {
 }
 
 function signSession(payload) {
+  if (!sessionSecret) throw new MemoryAccessError(503, 'sign_in_unavailable', 'Sign-in is unavailable.');
   const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = createHmac('sha256', sessionSecret).update(encoded).digest('base64url');
   return `${encoded}.${signature}`;
 }
 
 function readSession(req) {
-  const cookie = parseCookies(req).one_db_session;
+  if (!sessionSecret) return null;
+  let cookie;
+  try { cookie = parseCookies(req).one_db_session; } catch { return null; }
   if (!cookie || !cookie.includes('.')) return null;
   const [encoded, signature] = cookie.split('.', 2);
   const expected = createHmac('sha256', sessionSecret).update(encoded).digest('base64url');
@@ -134,11 +137,19 @@ function readSession(req) {
   }
 }
 
-function sessionCookie(account) {
+async function sessionCookie(account) {
+  const tenantId = Number(account.tenantId ?? account.TenantId);
+  const accountId = Number(account.id ?? account.Id);
+  if (!Number.isSafeInteger(tenantId) || tenantId <= 0 || !Number.isSafeInteger(accountId) || accountId <= 0)
+    throw new MemoryAccessError(503, 'sign_in_unavailable', 'The account tenant is unavailable.');
+  const tenant = await sapi(`/platform/tenants/${tenantId}`);
+  const canonicalTenantUid = tenant.data?.tenantUid ?? tenant.data?.TenantUid;
+  if (!tenant.ok || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalTenantUid || ''))
+    throw new MemoryAccessError(503, 'sign_in_unavailable', 'The account tenant is unavailable.');
   const payload = {
-    accountId: account.id || account.Id,
-    tenantId: account.tenantId || account.TenantId,
-    tenantUid: account.tenantUid || account.TenantUid || account.tenant?.uid || account.Tenant?.Uid || '',
+    accountId,
+    tenantId,
+    tenantUid: canonicalTenantUid.toLowerCase(),
     email: account.email || account.Email || account.userName || account.UserName || '',
     expires: Date.now() + 8 * 60 * 60 * 1000
   };
@@ -147,7 +158,12 @@ function sessionCookie(account) {
 
 async function readBody(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let bytes = 0;
+  for await (const chunk of req) {
+    bytes += chunk.length;
+    if (bytes > 1024 * 1024) throw new MemoryAccessError(413, 'request_too_large', 'The request exceeds the size limit.');
+    chunks.push(chunk);
+  }
   const text = Buffer.concat(chunks).toString('utf8');
   if (!text) return { text: '', json: null };
   try {
@@ -155,24 +171,6 @@ async function readBody(req) {
   } catch {
     return { text, json: null };
   }
-}
-
-function tenantUidFrom(req, url, body) {
-  return req.headers['x-nrun-tenant-uid']
-    || req.headers['x-1db-tenant-uid']
-    || url.searchParams.get('tenantUid')
-    || body?.tenantUid
-    || body?.tenant?.uid
-    || '';
-}
-
-function tenantUidFromRequest(req, url, body) {
-  const session = readSession(req);
-  return tenantUidFrom(req, url, body)
-    || session?.tenantUid
-    || (/^[0-9a-f-]{36}$/i.test(String(session?.tenantId || '')) ? session.tenantId : '')
-    || (session ? defaultTenantUid : '')
-    || '';
 }
 
 async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 15000 } = {}) {
@@ -203,25 +201,25 @@ async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 1500
   }
 }
 
+async function memoryAccess(req, url, body, parts) {
+  return authorizeMemoryRequest(req, url, body, parts, {
+    readSession, serviceToken: sapiToken, publicOrigin, allowedOrigins,
+    validateToken: request => sapi(`/platform/applications/${encodeURIComponent(appKey)}/tenant-credentials/validate`, { method: 'POST', body: request })
+  });
+}
+
 async function proxyCognition(req, res, url, parts) {
   const { json: bodyJson } = await readBody(req);
-  const tenantUid = tenantUidFromRequest(req, url, bodyJson);
-  if (!tenantUid) {
-    return json(res, 400, {
-      error: {
-        code: 'tenant_required',
-        message: 'Sign in to use tenant-scoped cognition routes.'
-      }
-    });
-  }
-
+  const access = await memoryAccess(req, url, bodyJson, parts);
+  const tenantUid = access.tenantUid;
+  const boundBody = bindMemoryRequest(bodyJson, access);
   const path = cleanPath(parts.join('/'));
   const suffix = url.search ? url.search : '';
   const result = await sapi(
     `/platform/applications/${encodeURIComponent(appKey)}/tenants/${encodeURIComponent(tenantUid)}/cognition/${path}${suffix}`,
     {
       method: req.method,
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : (bodyJson ?? {}),
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : boundBody,
       timeoutMs: path === 'seed' ? 120000 : 15000,
       headers: {
         'x-1db-request-id': req.headers['x-request-id'] || randomUUID(),
@@ -229,28 +227,24 @@ async function proxyCognition(req, res, url, parts) {
       }
     }
   );
+  if (result.ok && parts[0] === 'context' && parts[1] === 'packets' &&
+      !canReadMemoryPacket(result.data?.packet ?? result.data?.Packet, access))
+    throw new MemoryAccessError(403, 'scope_access_denied', 'This scoped context packet belongs to a different principal.');
   return json(res, result.status, result.data ?? {});
 }
 
 async function proxyProjectCognition(req, res, url, parts) {
   const { json: bodyJson } = await readBody(req);
-  const tenantUid = tenantUidFromRequest(req, url, bodyJson);
-  if (!tenantUid) {
-    return json(res, 400, {
-      error: {
-        code: 'tenant_required',
-        message: 'Sign in to use tenant-scoped cognition routes.'
-      }
-    });
-  }
-
+  const access = await memoryAccess(req, url, bodyJson, parts);
+  const tenantUid = access.tenantUid;
+  const boundBody = bindMemoryRequest(bodyJson, access);
   const path = cleanPath(parts.join('/'));
   const suffix = `${path ? `/${path}` : ''}${url.search || ''}`;
   const result = await sapi(
     `/platform/applications/${encodeURIComponent(appKey)}/tenants/${encodeURIComponent(tenantUid)}/project-cognition${suffix}`,
     {
       method: req.method,
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : (bodyJson ?? {}),
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : boundBody,
       headers: {
         'x-1db-request-id': req.headers['x-request-id'] || randomUUID(),
         ...(req.headers['idempotency-key'] ? { 'idempotency-key': req.headers['idempotency-key'] } : {})
@@ -293,7 +287,7 @@ const server = createServer(async (req, res) => {
         }
       });
       if (!result.ok || !result.data) return html(res, 401, signInPage('Invalid email or password.'));
-      return redirect(res, '/admin', { 'set-cookie': sessionCookie(result.data) });
+      return redirect(res, '/admin', { 'set-cookie': await sessionCookie(result.data) });
     }
     if (url.pathname === '/signout' && req.method === 'POST') {
       return redirect(res, '/', { 'set-cookie': 'one_db_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0' });
@@ -376,28 +370,29 @@ const server = createServer(async (req, res) => {
     }
     const parts = url.pathname.split('/').filter(Boolean);
     if (parts[0] === 'api' && parts[1] === 'project-cognition') {
-      return proxyProjectCognition(req, res, url, parts.slice(2));
+      return await proxyProjectCognition(req, res, url, parts.slice(2));
     }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'project-cognition') {
-      return proxyProjectCognition(req, res, url, parts.slice(3));
+      return await proxyProjectCognition(req, res, url, parts.slice(3));
     }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cognition') {
-      return proxyCognition(req, res, url, parts.slice(3));
+      return await proxyCognition(req, res, url, parts.slice(3));
     }
     if (parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'cam') {
-      return proxyCognition(req, res, url, ['cam', ...parts.slice(3)]);
+      return await proxyCognition(req, res, url, ['cam', ...parts.slice(3)]);
     }
     if (parts[0] === '1db' && parts[1] === 'cognition') {
       const cognitionParts = parts.length === 2 ? ['graph'] : parts.slice(2);
-      return proxyCognition(req, res, url, cognitionParts);
+      return await proxyCognition(req, res, url, cognitionParts);
     }
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) return html(res, 404, notFoundPage());
     return json(res, 404, { error: { code: 'not_found', message: 'No route matched.' } });
   } catch (error) {
-    return json(res, 500, { error: { code: 'server_error', message: error?.message || 'Unhandled 1db server error.' } });
+    if (error instanceof MemoryAccessError) return json(res, error.status, { error: { code: error.code, message: error.message } });
+    return json(res, 500, { error: { code: 'server_error', message: 'The request could not be completed.' } });
   }
 });
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`1db platform server listening on ${port}`);
+  console.log(`1db platform server listening on ${server.address().port}`);
 });

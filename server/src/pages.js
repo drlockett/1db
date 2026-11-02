@@ -129,6 +129,7 @@ db.simulation.project(goal)</code></pre></div></section>
 export function docsPage() {
   return page(`${nav('Docs')}<main>
 <section class="hero"><p class="pill">Developer docs</p><h1>Build on semantic persistence.</h1><p class="lead">Use 1DB to observe communication events, preserve durable cognition, and compile scoped context for agents at the moment of action.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/openapi.json">OpenAPI JSON</a></p></section>
+<section class="card"><h2>Authenticated tenant access</h2><p>Use a signed-in 1db session or a tenant application credential with cognition:read or cognition:write scope. A tenant identifier selects context; it never grants access. Credentials and sessions cannot select another tenant.</p><p>Context retrieval can include up to eight explicit scopeRefs. Its durable packet records each selected checkpoint identifier, version and integrity hash. Private scopes require an owner or explicit reader policy. Portable collaboration packets preserve identity, outstanding responsibilities, decision references and evidence; recorded authority references must be verified before execution.</p></section>
 <section class="hero split"><div><p class="kicker">CLI</p><h2>Install the 1db command line.</h2><p class="muted">The CLI wraps the 1db REST API for creating resources from scripts, terminals, CI, and agent workflows.</p><pre><code>brew tap drlockett/1db
 brew install drlockett/1db/1db
 
@@ -144,14 +145,18 @@ db.context.compile(situation)
 db.trust.evaluate(claim)
 db.temporal.reconstruct(entity)
 db.simulation.project(goal)</code></pre><p class="muted">Some high-level primitives are roadmap vocabulary until the matching public endpoint is verified.</p></article><article class="card"><h3>Operational cognition API</h3><pre><code>curl -X POST https://1db.io/api/v1/cognition/events \\
+ -H "Authorization: Bearer $ONE_DB_API_KEY" \\
  -H "X-NRun-Tenant-Uid: $TENANT_UID" \\
  -H "Content-Type: application/json" \\
  -d '{"type":"conversation.message","payload":{"text":"Remember this."}}'</code></pre></article><article class="card"><h3>Route planner</h3><pre><code>curl https://1db.io/api/v1/cognition/backends/plan?operation=retrieve \\
+ -H "Authorization: Bearer $ONE_DB_API_KEY" \\
  -H "X-NRun-Tenant-Uid: $TENANT_UID"</code></pre></article></section>
 <section class="hero"><p class="kicker">Project Cognition API</p><h2>Persistent execution continuity for projects.</h2><p class="lead">Project Cognition stores versioned operating context that agents can retrieve before they begin work in a repository, workspace, tenant, environment, or domain.</p><div class="grid"><article class="card"><h3>Create cognition</h3><pre><code>curl -X POST https://1db.io/api/project-cognition \\
+ -H "Authorization: Bearer $ONE_DB_API_KEY" \\
  -H "X-NRun-Tenant-Uid: $TENANT_UID" \\
  -H "Content-Type: application/json" \\
  -d '{"projectKey":"project-alpha","projectName":"Project Alpha","operationalRules":["Preserve unrelated changes"],"deploymentRules":["Use the current platform runtime"],"isActive":true}'</code></pre></article><article class="card"><h3>Load active context</h3><pre><code>curl https://1db.io/api/project-cognition/project-alpha/active \\
+ -H "Authorization: Bearer $ONE_DB_API_KEY" \\
  -H "X-NRun-Tenant-Uid: $TENANT_UID"</code></pre></article><article class="card"><h3>Lifecycle</h3><pre><code>GET  /api/project-cognition
 GET  /api/project-cognition/{projectKey}
 POST /api/project-cognition
@@ -605,13 +610,14 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
     servers: [{ url: publicOrigin }],
     components: {
       securitySchemes: {
-        tenantUid: { type: 'apiKey', in: 'header', name: 'X-NRun-Tenant-Uid' }
+        tenantCredential: { type: 'http', scheme: 'bearer', description: 'Tenant application credential with cognition:read or cognition:write scope.' },
+        sessionCookie: { type: 'apiKey', in: 'cookie', name: 'one_db_session' }
       }
     },
-    security: [{ tenantUid: [] }],
+    security: [{ tenantCredential: [] }, { sessionCookie: [] }],
     paths: {
       '/api/v1/cognition/events': { post: { summary: 'Observe a communication or state-change event and optional memory.' } },
-      '/api/v1/cognition/context/retrieve': { post: { summary: 'Compile and retrieve a durable context packet.' } },
+      '/api/v1/cognition/context/retrieve': { post: { summary: 'Retrieve authorized context with exact checkpoint provenance.', description: 'Requires cognition:read. Optional scopeRefs selects at most eight explicit continuity scopes and can pin expectedVersion, expectedCheckpointUid and expectedIntegrityHash. Private scopes require owner or explicit reader access. The durable packet preserves each selected checkpoint UID, version and integrity hash.' } },
       '/api/v1/cognition/context/packets/{packetUid}': { get: { summary: 'Read a previously created context packet.' } },
       '/api/v1/cognition/graph': { get: { summary: 'Read the 1DB base cognition graph root.' } },
       '/api/v1/cam': { get: { summary: 'Read the CAM manifest, layers, engines, relation types, and live counts.' } },
