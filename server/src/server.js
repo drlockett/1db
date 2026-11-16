@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import { authorizeMemoryRequest, bindMemoryRequest, canReadMemoryPacket, MemoryAccessError } from './memory-access.js';
+import { authorizeMemoryRequest, bindMemoryRequest, canReadMemoryPacket, MemoryAccessError, requireContinuityAccess } from './memory-access.js';
 import { readFile } from 'node:fs/promises';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -211,6 +211,7 @@ async function memoryAccess(req, url, body, parts) {
 async function proxyCognition(req, res, url, parts) {
   const { json: bodyJson } = await readBody(req);
   const access = await memoryAccess(req, url, bodyJson, parts);
+  requireContinuityAccess(parts, access);
   const tenantUid = access.tenantUid;
   const boundBody = bindMemoryRequest(bodyJson, access);
   const path = cleanPath(parts.join('/'));

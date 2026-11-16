@@ -29,6 +29,13 @@ export function requiredMemoryScope(method, parts) {
   return read ? 'cognition:read' : 'cognition:write';
 }
 
+export function requireContinuityAccess(parts, access) {
+  if (access.trustedService) return;
+  const path = parts.flatMap(part => decodeURIComponent(part).split('/')).map(part => part.trim().toLowerCase());
+  if (path[0] === 'continuity' && path[1] === 'engagement' && path[2]?.startsWith('syn-persona-imprint-v1-'))
+    throw new MemoryAccessError(403, 'scope_access_denied', 'A service credential is required for this continuity scope.');
+}
+
 // The platform API authenticates this app separately. A caller's tenant selection
 // never becomes caller authentication, and request JSON never supplies this context.
 export async function authorizeMemoryRequest(req, url, body, parts, options) {
