@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { authorizeMemoryRequest, bindMemoryRequest, canReadMemoryPacket, MemoryAccessError, requireContinuityAccess } from './memory-access.js';
+import { createPersonaModelAuthorizer } from './persona-model-access.js';
 import { readFile } from 'node:fs/promises';
 import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ const port = Number(process.env.PORT || 8080);
 const publicOrigin = process.env.PUBLIC_ORIGIN || 'https://1db.io';
 const sapiBase = (process.env.SAPI_BASE_URL || 'https://sapi.nrun.ws/v1').replace(/\/$/, '');
 const sapiToken = process.env.SAPI_SERVICE_TOKEN || process.env.NRUN_SAPI_SERVICE_TOKEN || '';
+const personaGatewayToken = process.env.ONE_DB_PERSONA_GATEWAY_TOKEN || '';
 const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
 const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken;
@@ -156,21 +158,49 @@ async function sessionCookie(account) {
   return `one_db_session=${encodeURIComponent(signSession(payload))}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=28800`;
 }
 
-async function readBody(req) {
+async function readBody(req, limit = 1024 * 1024) {
   const chunks = [];
   let bytes = 0;
   for await (const chunk of req) {
     bytes += chunk.length;
-    if (bytes > 1024 * 1024) throw new MemoryAccessError(413, 'request_too_large', 'The request exceeds the size limit.');
+    if (bytes > limit) throw new MemoryAccessError(413, 'request_too_large', 'The request exceeds the size limit.');
     chunks.push(chunk);
   }
-  const text = Buffer.concat(chunks).toString('utf8');
-  if (!text) return { text: '', json: null };
+  const raw = Buffer.concat(chunks);
+  const text = raw.toString('utf8');
+  if (!text) return { text: '', json: null, raw };
   try {
-    return { text, json: JSON.parse(text) };
+    return { text, json: JSON.parse(text), raw };
   } catch {
-    return { text, json: null };
+    return { text, json: null, raw };
   }
+}
+
+async function modelAuthority(tenantUid, operation, body) {
+  if (!sapiToken || !personaGatewayToken) throw new MemoryAccessError(503, 'memory_unavailable', 'Persona memory is unavailable.');
+  const result = await sapi(`/platform/persona-model-authority/tenants/${tenantUid}/${operation}`,
+    { method: 'POST', body, headers: { 'X-1db-Persona-Gateway': personaGatewayToken } });
+  if (result.status >= 500 || result.status === 404 || result.status === 401)
+    throw new MemoryAccessError(503, 'memory_unavailable', 'Persona memory is unavailable.');
+  return result;
+}
+
+const authorizePersonaModel = createPersonaModelAuthorizer({ audience: new URL(publicOrigin).origin,
+  loadAuthority: async ({ tenantUid, ...scope }) => (await modelAuthority(tenantUid, 'resolve', scope)).data,
+  consumeNonce: async ({ tenantUid, ...nonce }) => (await modelAuthority(tenantUid, 'nonces', nonce)).status === 204 });
+
+async function proxyPersonaModel(req, res) {
+  const body = await readBody(req, 100_000);
+  let scope;
+  try { scope = await authorizePersonaModel({ method: req.method, path: req.url, headers: req.headers, body: body.raw }); }
+  catch (error) {
+    if (error.status === 403) throw new MemoryAccessError(403, 'persona_access_denied', 'Persona memory access denied.');
+    throw error;
+  }
+  const { tenantUid, ...authorization } = scope;
+  const result = await modelAuthority(tenantUid, 'model', { scope: authorization, parameters: body.json });
+  if (result.status === 204) return send(res, 204, '', { 'cache-control': 'no-store' });
+  return json(res, result.status, result.data);
 }
 
 async function sapi(path, { method = 'GET', body, headers = {}, timeoutMs = 15000 } = {}) {
@@ -259,6 +289,8 @@ const server = createServer(async (req, res) => {
   try {
     res.req = req;
     const url = new URL(req.url || '/', publicOrigin);
+    if (/^\/v1\/platform\/applications\/1db\/tenants\/[^/]+\/persona-models\//.test(url.pathname))
+      return await proxyPersonaModel(req, res);
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
