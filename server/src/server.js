@@ -305,6 +305,9 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/assets/agentic-memory-hero.jpg' && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'agentic-memory-hero.jpg', 'image/jpeg', req.method === 'HEAD');
     }
+    if (url.pathname === '/assets/agentic-memory-graph-v2.jpg' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'agentic-memory-graph-v2.jpg', 'image/jpeg', req.method === 'HEAD');
+    }
     if (url.pathname === '/assets/learns.png' && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'learns.png', 'image/png', req.method === 'HEAD');
     }

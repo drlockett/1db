@@ -114,9 +114,9 @@ function cognitionGraphSection() {
 export function homePage() {
   const title = '1db | Agentic Memory';
   const description = '1db is Agentic Memory, the memory foundation for persistent intelligence. Give AI agents durable memory across sessions, systems, and time.';
-  const heroImage = '/assets/agentic-memory-hero.jpg';
+  const heroImage = '/assets/agentic-memory-graph-v2.jpg';
   const canonical = 'https://1db.io/';
-  const imageAlt = 'Layers of smoked glass connected by mint traces, illustrating memory carried across sessions.';
+  const imageAlt = '1db Agentic Memory connects knowledge, experience, identity, and relationships across past, present, and future, with AI agents linked to shared memory.';
   const contextRequest = JSON.stringify({
     projectId: 'release-review',
     query: 'What still needs approval?'
@@ -435,7 +435,7 @@ ${nav(content.label)}
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(content.description)}">
   <meta property="og:url" content="${canonical}">
-  <meta property="og:image" content="https://1db.io/assets/agentic-memory-hero.jpg">
+  <meta property="og:image" content="https://1db.io/assets/agentic-memory-graph-v2.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="${marketingStylesheet}">`
   });
