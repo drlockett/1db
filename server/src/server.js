@@ -299,7 +299,7 @@ const server = createServer(async (req, res) => {
       if (req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
       return html(res, 200, productPage(url.pathname));
     }
-    if (url.pathname === '/assets/home.css' && ['GET', 'HEAD'].includes(req.method)) {
+    if ((url.pathname === '/assets/home.css' || /^\/assets\/home\.[a-f0-9]{12}\.css$/.test(url.pathname)) && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'home.css', 'text/css; charset=utf-8', req.method === 'HEAD', 'no-cache');
     }
     if (url.pathname === '/assets/agentic-memory-hero.jpg' && ['GET', 'HEAD'].includes(req.method)) {

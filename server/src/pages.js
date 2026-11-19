@@ -1,3 +1,8 @@
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+
+const marketingStylesheet = '/assets/home.' + createHash('sha256').update(readFileSync(new URL('../public/home.css', import.meta.url))).digest('hex').slice(0, 12) + '.css';
+
 function esc(value) {
   return String(value || '').replace(/[&<>"]/g, char => ({
     '&': '&amp;',
@@ -57,6 +62,55 @@ function nav(active = '') {
   return `<header class="nav"><a class="brand" href="/">1db.io</a><nav aria-label="Main navigation">${link('/continuity', 'Continuity')}${link('/capabilities', 'Capabilities')}${link('/architecture', 'Architecture')}${link('/governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
 }
 
+const memoryLayers = [
+  ['Working Memory', 'Context relevant to the current task, actor, and goal.'],
+  ['Episodic Memory', 'Observed events, decisions, actions, and outcomes with their source and time.'],
+  ['Semantic Memory', 'Facts, concepts, and knowledge that give events meaning.'],
+  ['Relationship Memory', 'Connections between people, agents, projects, and other entities.'],
+  ['Identity Memory', 'Continuity of preferences, goals, and persona traits across sessions.'],
+  ['Temporal Memory', 'Sequence, change, and the history behind the current state.'],
+  ['Predictive / Simulation Memory', 'A roadmap layer for retaining hypothetical branches and projected outcomes.']
+];
+
+function memoryLayersSection() {
+  return `<section class="homeSection memoryLayerSection" id="memory-layers">
+    <div class="sectionIntro">
+      <p class="homeEyebrow">Memory model</p>
+      <h2>Memory at every level of a task.</h2>
+      <p>The 1db memory model describes the different kinds of context that contribute to persistent agency.</p>
+    </div>
+    <dl class="memoryLayerCards">${memoryLayers.map(([name, detail]) => `<div><dt>${esc(name)}</dt><dd>${esc(detail)}</dd></div>`).join('')}</dl>
+  </section>`;
+}
+
+function cognitionGraphSection() {
+  return `<section class="homeSection" id="cognition-graph">
+    <div class="sectionIntro">
+      <p class="homeEyebrow">Cognition graph</p>
+      <h2>Concepts become explainable associations.</h2>
+      <p>A cognition graph begins with facts, then connects them through relationships whose strength changes the result. The same inputs can produce different outcomes when the association weight shifts.</p>
+    </div>
+    <figure class="associationFigure">
+      <div class="associationExample">
+        <p class="exampleLabel">Illustrative association</p>
+        <div class="associationPath">
+          <div class="conceptCard"><span>Concept</span><strong>Water</strong><p>The observed substance</p></div>
+          <span class="associationConnector" aria-label="connected to">+</span>
+          <div class="conceptCard"><span>Condition</span><strong>Cold</strong><p>The surrounding context</p></div>
+          <span class="associationConnector" aria-label="leads to">→</span>
+          <div class="conceptCard resultConcept"><span>Related concept</span><strong>Ice</strong><p>A possible outcome</p></div>
+        </div>
+      </div>
+      <div class="associationExplanation">
+        <h3>Relationship strength changes relevance.</h3>
+        <p>A weaker association with cold may point toward cool water. A stronger association may make ice more relevant.</p>
+        <p>Provenance, conditions, and the relationships between concepts help explain how the result was reached.</p>
+      </div>
+      <figcaption>An illustrative memory model. Outcomes depend on the conditions and evidence recorded with an association.</figcaption>
+    </figure>
+  </section>`;
+}
+
 export function homePage() {
   const title = '1db | Agentic Memory';
   const description = '1db is Agentic Memory for AI agents. Record decisions and events, preserve project context, and retrieve authorized memory across sessions and handoffs.';
@@ -87,6 +141,9 @@ ${nav()}
       <img src="${heroImage}" width="1448" height="1086" alt="${esc(imageAlt)}" fetchpriority="high">
     </figure>
   </section>
+
+  ${memoryLayersSection()}
+  ${cognitionGraphSection()}
 
   <section class="homeSection" id="continuity" aria-labelledby="continuity-title">
     <span id="session-amnesia" class="homeAnchor"></span>
@@ -182,7 +239,7 @@ ${nav()}
   <meta property="og:image" content="${new URL(heroImage, canonical).href}">
   <meta property="og:image:alt" content="${esc(imageAlt)}">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="/assets/home.css">`
+  <link rel="stylesheet" href="${marketingStylesheet}">`
   });
 }
 
@@ -257,18 +314,7 @@ const productPages = {
     description: 'Explore 1db memory layers, temporal cognition, relationships, trust, and the roadmap for decay, reinforcement, and simulation.',
     intro: '1db connects memory with identity, relationships, trust, context, and time so agents can act with an understanding of what came before.',
     body: `
-<section class="homeSection" id="memory-layers">
-  <div class="sectionIntro"><h2>Memory at every level of a task.</h2><p>The 1db memory model describes the different kinds of context that contribute to persistent agency.</p></div>
-  <dl class="detailList">
-    <div><dt>Working Memory</dt><dd>Context relevant to the current task, actor, and goal.</dd></div>
-    <div><dt>Episodic Memory</dt><dd>Observed events, decisions, actions, and outcomes with their source and time.</dd></div>
-    <div><dt>Semantic Memory</dt><dd>Facts, concepts, and knowledge that give events meaning.</dd></div>
-    <div><dt>Relationship Memory</dt><dd>Connections between people, agents, projects, and other entities.</dd></div>
-    <div><dt>Identity Memory</dt><dd>Continuity of preferences, goals, and persona traits across sessions.</dd></div>
-    <div><dt>Temporal Memory</dt><dd>Sequence, change, and the history behind the current state.</dd></div>
-    <div><dt>Predictive / Simulation Memory</dt><dd>A roadmap layer for retaining hypothetical branches and projected outcomes.</dd></div>
-  </dl>
-</section>
+${memoryLayersSection()}
 <section class="homeSection" id="time">
   <div class="sectionIntro"><p class="homeEyebrow">Temporal cognition</p><h2>Continuity exists across time.</h2><p>1db treats time as semantic change. What happened, when it happened, why it mattered, what changed, what it influenced, and how meaning evolved.</p></div>
   <div class="memorySteps">
@@ -315,18 +361,7 @@ const productPages = {
     <li><h3>Agent Runtime</h3><p>The agent uses retrieved context to continue reasoning, acting, and communicating through live endpoints.</p></li>
   </ol>
 </section>
-<section class="homeSection" id="cognition-graph">
-  <div class="sectionIntro"><p class="homeEyebrow">Cognition graph</p><h2>Concepts become explainable associations.</h2><p>A cognition graph begins with facts, then connects them through relationships whose strength changes the result. The same inputs can produce different outcomes when the association weight shifts.</p></div>
-  <figure class="graphFigure">
-    <img src="/assets/cognition-graph.png" width="1536" height="1024" loading="lazy" alt="Illustrative cognition graph connecting water, cold, ice, oil, and heat through weighted associations.">
-    <figcaption>Illustrative associations show how a concept connects to conditions, relationships, and possible outcomes.</figcaption>
-  </figure>
-  <div class="memorySteps">
-    <article><h3>Fact</h3><p>Water exists.</p></article>
-    <article><h3>Association</h3><p>Water and cold are linked to ice.</p></article>
-    <article><h3>Weighted association</h3><p>The strength of the relationship changes which connected concepts become relevant.</p></article>
-  </div>
-</section>
+${cognitionGraphSection()}
 <section class="homeSection homeSplit" id="context-packets">
   <div class="sectionIntro"><h2>Context with a recoverable history.</h2><p>Context packets preserve selected checkpoint identifiers, versions, integrity hashes, and exact state. An incoming agent can recover the context behind a handoff and check the evidence it references.</p><a class="homeLink" href="/docs">Integrate context retrieval ↗</a></div>
   <dl class="architectureList">
@@ -402,7 +437,7 @@ ${nav(content.label)}
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="https://1db.io/assets/agentic-memory-hero.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="/assets/home.css">`
+  <link rel="stylesheet" href="${marketingStylesheet}">`
   });
 }
 
