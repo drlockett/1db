@@ -73,6 +73,26 @@ test('all public cognition aliases enforce principal and tenant binding before p
   const privatePacket=await call('/api/v1/cognition/context/packets/fixture',{headers:{cookie:signedCookie(7)}});
   assert.equal(privatePacket.status,403,'a tenant peer cannot export another principal’s scoped packet');
 
+  const imprint = 'syn-persona-imprint-v1-' + '0'.repeat(64);
+  const rawPaths = [
+    `/api/v1/cognition/continuity/engagement/${imprint}`,
+    `/1db/cognition/CONTINUITY/%65ngagement/%20${imprint.toUpperCase()}%20`,
+    `/api/v1/cognition/continuity/engagement/${imprint}/checkpoints`
+  ];
+  for (const [index, path] of rawPaths.entries()) {
+    const options = index < 2 ? {} : { method: 'POST', body: '{}' };
+    const forwarded = calls.filter(request => request.path.includes('/cognition/')).length;
+    for (const headers of [{ cookie: signedCookie(7), origin: 'https://1db.io' }, { authorization: `Bearer ${credential}` }]) {
+      const response = await call(path, { ...options, headers });
+      assert.equal(response.status, 403, path);
+      assert.equal(calls.filter(request => request.path.includes('/cognition/')).length, forwarded);
+    }
+  }
+  const serviceHeaders = { 'x-nrun-sapi-token': service, 'x-nrun-tenant-uid': tenant };
+  assert.equal((await call(rawPaths[0], { headers: serviceHeaders })).status, 200);
+  assert.equal((await call(rawPaths[2], { method: 'POST', body: '{}', headers: serviceHeaders })).status, 200);
+  assert.equal((await call('/api/v1/cognition/continuity/engagement/fixture', { headers: { cookie: signedCookie(7) } })).status, 200);
+
   const signIn=await fetch(`${base}/signin`,{method:'POST',redirect:'manual',headers:{'content-type':'application/x-www-form-urlencoded'},body:'email=fixture%40example.invalid&password=local-fixture-password'});
   assert.equal(signIn.status,303);
   const cookie=signIn.headers.get('set-cookie');
