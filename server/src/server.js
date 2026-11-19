@@ -11,6 +11,7 @@ import {
   homePage,
   notFoundPage,
   openApiDocument,
+  productPage,
   signInPage,
   waitlistPage,
   waitlistThanksPage
@@ -294,6 +295,10 @@ const server = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
+    if (['/continuity', '/capabilities', '/architecture', '/governance'].includes(url.pathname) && ['GET', 'HEAD'].includes(req.method)) {
+      if (req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+      return html(res, 200, productPage(url.pathname));
+    }
     if (url.pathname === '/assets/home.css' && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'home.css', 'text/css; charset=utf-8', req.method === 'HEAD', 'no-cache');
     }

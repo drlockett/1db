@@ -369,3 +369,153 @@
     scroll-behavior: auto;
   }
 }
+
+.homePage .nav nav a[aria-current="page"] {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}
+
+.contentHero {
+  padding-block: clamp(46px, 7vw, 90px);
+  max-width: 980px;
+}
+
+.homePage.productPage h1 {
+  font-size: clamp(2.6rem, 5vw, 4.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+
+.contentHero .heroDetail {
+  max-width: 65ch;
+  font-size: clamp(1.08rem, 1.7vw, 1.25rem);
+}
+
+.sectionIntro > p + p {
+  margin-top: 14px;
+}
+
+.contentPanel {
+  padding: clamp(22px, 3vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.contentPanel p,
+.contentPanel li {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.contentPanel p:last-child {
+  margin-bottom: 0;
+}
+
+.detailList {
+  margin: 26px 0 0;
+}
+
+.detailList > div {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, 2.2fr);
+  gap: clamp(16px, 3vw, 42px);
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.detailList > div:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.detailList dt {
+  font-size: 1.1rem;
+  font-weight: 750;
+  color: var(--ink);
+}
+
+.detailList dd {
+  margin: 0;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.directionNote {
+  padding: 22px 26px;
+  margin-top: 24px;
+  border-left: 3px solid var(--accent);
+  background: #e9f1ec;
+}
+
+.directionNote p {
+  max-width: 75ch;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 0;
+}
+
+.architectureFlow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 36px;
+  list-style: none;
+  padding: 0;
+  margin: 28px 0 0;
+}
+
+.architectureFlow li {
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+
+.architectureFlow p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.graphFigure {
+  margin: 28px 0 0;
+}
+
+.graphFigure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+}
+
+.graphFigure figcaption {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.relatedPages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 36px;
+  border-top: 1px solid var(--line);
+  padding: 24px 0 42px;
+}
+
+.relatedPages .homeLink {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .detailList > div,
+  .architectureFlow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detailList > div {
+    gap: 8px;
+  }
+
+  .homeSplit .architectureList div {
+    grid-template-columns: minmax(110px, 1fr) minmax(0, 1.7fr);
+  }
+}

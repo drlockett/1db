@@ -54,7 +54,7 @@ function page(body, title = '1db.io', { head = '', bodyClass = '' } = {}) {
 
 function nav(active = '') {
   const link = (href, text) => `<a href="${href}"${active === text ? ' aria-current="page"' : ''}>${text}</a>`;
-  return `<header class="nav"><a class="brand" href="/">1db.io</a><nav>${link('/#continuity', 'Continuity')}${link('/#capabilities', 'Capabilities')}${link('/#architecture', 'Architecture')}${link('/#governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
+  return `<header class="nav"><a class="brand" href="/">1db.io</a><nav aria-label="Main navigation">${link('/continuity', 'Continuity')}${link('/capabilities', 'Capabilities')}${link('/architecture', 'Architecture')}${link('/governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
 }
 
 export function homePage() {
@@ -94,6 +94,7 @@ ${nav()}
     <div class="sectionIntro">
       <h2 id="continuity-title">How Agentic Memory works</h2>
       <p>Keep the decisions, constraints, and open work that an agent needs to resume a task.</p>
+      <a class="homeLink" href="/capabilities">Explore memory layers and capabilities ↗</a>
     </div>
     <div class="memorySteps" id="capabilities">
       <article>
@@ -130,6 +131,7 @@ ${nav()}
     <div class="sectionIntro">
       <h2 id="architecture-title">Memory across agents and sessions.</h2>
       <p>1db provides the memory layer for agent workflows. When agents communicate through NodeVertex, 1db can preserve the decisions and project state that need to outlast a conversation.</p>
+      <a class="homeLink" href="/architecture">Explore the architecture ↗</a>
     </div>
     <dl class="architectureList">
       <div><dt>Scope</dt><dd>Retrieve context for the relevant project, persona, or collaboration.</dd></div>
@@ -143,8 +145,22 @@ ${nav()}
     <div class="sectionIntro">
       <h2 id="governance-title">Control who can read and write memory.</h2>
       <p>1db checks tenant access and credential scopes. Private continuity scopes require owner or explicitly granted access.</p>
-      <a class="homeLink" href="/docs">Read about authentication <span aria-hidden="true">↗</span></a>
+      <a class="homeLink" href="/governance">Explore trust and governance <span aria-hidden="true">↗</span></a>
     </div>
+  </section>
+
+  <section class="homeSection homeSplit" aria-labelledby="continuity-detail-title">
+    <div class="sectionIntro">
+      <p class="homeEyebrow">Persistent agency</p>
+      <h2 id="continuity-detail-title">Memory for people, projects, and organizations.</h2>
+      <p>Communication + Memory + Time + Identity = Persistent Agency. 1db connects project knowledge, persona continuity, relationships, and shared organizational context.</p>
+      <a class="homeLink" href="/continuity">Explore continuity across sessions ↗</a>
+    </div>
+    <dl class="architectureList">
+      <div><dt>Project Cognition</dt><dd>Architecture, workflows, constraints, and team conventions carried into the next session.</dd></div>
+      <div><dt>Persona continuity</dt><dd>Identity, preferences, goals, and relationships maintained across channels.</dd></div>
+      <div><dt>Enterprise cognition</dt><dd>Institutional knowledge shared across authorized humans, agents, and applications.</dd></div>
+    </dl>
   </section>
 
   <section class="previewCallout" aria-labelledby="preview-title">
@@ -165,6 +181,226 @@ ${nav()}
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="${new URL(heroImage, canonical).href}">
   <meta property="og:image:alt" content="${esc(imageAlt)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/assets/home.css">`
+  });
+}
+
+const productPages = {
+  '/continuity': {
+    label: 'Continuity',
+    title: 'Continuity for agents, projects, and teams',
+    description: 'Explore how 1db Agentic Memory preserves project knowledge, persona identity, and shared organizational context across sessions and handoffs.',
+    intro: 'Communication + Memory + Time + Identity = Persistent Agency. Agentic Memory gives the work of people, agents, and teams continuity across sessions.',
+    body: `
+<section class="homeSection homeSplit" id="project-cognition">
+  <div class="sectionIntro">
+    <p class="homeEyebrow">Project Cognition</p>
+    <h2>Project communication becomes reliable execution context.</h2>
+    <p>Project Cognition is persistent, versioned execution continuity for how an AI should operate within a project, team, workspace, tenant, repository, environment, or domain.</p>
+    <p>Architecture, workflows, constraints, standards, preferences, security requirements, and operating procedures become durable context instead of repeated instructions.</p>
+    <a class="homeLink" href="/docs">Explore the Project Cognition API ↗</a>
+  </div>
+  <div class="contentPanel">
+    <h3>Carry the operating context forward</h3>
+    <ul>
+      <li>Which repository and environment to use.</li>
+      <li>Required tools and deployment procedures.</li>
+      <li>Team conventions and security requirements.</li>
+      <li>Decisions, responsibilities, evidence, and open work.</li>
+    </ul>
+    <p>A versioned checkpoint preserves the state an incoming agent needs to resume work.</p>
+  </div>
+</section>
+<section class="homeSection" id="session-amnesia">
+  <div class="sectionIntro">
+    <h2>Stop repeating the setup every session.</h2>
+    <p>AI systems often begin each new conversation with incomplete operational context. Users repeat how a project is structured, which tools are required, how deployments work, and which team conventions matter.</p>
+  </div>
+  <div class="memorySteps">
+    <article><h3>Reduce repeated setup</h3><p>Keep project instructions available to the next authorized session.</p></article>
+    <article><h3>Maintain team conventions</h3><p>Preserve standards and preferences alongside the work they govern.</p></article>
+    <article><h3>Retain execution constraints</h3><p>Carry deployment, security, and workflow requirements into a handoff.</p></article>
+  </div>
+</section>
+<section class="homeSection" id="cognitive-layers">
+  <div class="sectionIntro"><h2>Durable cognition for AI systems.</h2><p>1db stores continuity at the layers where intelligent systems operate.</p></div>
+  <dl class="detailList">
+    <div><dt>Personal Cognition</dt><dd>What an AI knows about an individual.</dd></div>
+    <div><dt>Team Cognition</dt><dd>What an AI knows about a group or organization.</dd></div>
+    <div><dt>Project Cognition</dt><dd>How an AI should operate within a specific project or workspace.</dd></div>
+    <div><dt>Persona Cognition</dt><dd>What makes a particular AI persona unique.</dd></div>
+    <div><dt>Organizational Cognition</dt><dd>Policies, standards, governance, and institutional knowledge.</dd></div>
+  </dl>
+</section>
+<section class="homeSection homeSplit" id="enterprise">
+  <div class="sectionIntro"><p class="homeEyebrow">Enterprise cognition</p><h2>Companies forget too.</h2><p>Institutional continuity disappears through turnover, disconnected systems, siloed applications, and fragmented AI tooling. Shared organizational cognition carries knowledge across humans, agents, applications, infrastructure, and workflows.</p></div>
+  <dl class="architectureList">
+    <div><dt>Collective memory</dt><dd>Teams and agents share durable context and recover prior decisions.</dd></div>
+    <div><dt>Shared knowledge</dt><dd>Authorized systems can retrieve the project state relevant to their work.</dd></div>
+    <div><dt>Coordination</dt><dd>Portable collaboration packets preserve owners, responsibilities, decisions, and evidence.</dd></div>
+  </dl>
+</section>
+<section class="homeSection" id="persona">
+  <div class="sectionIntro"><p class="homeEyebrow">Persona continuity</p><h2>Identity across sessions and channels.</h2><p>Persona continuity brings together tone, memory, identity, goals, relationships, preferences, and behavioral traits across sessions, devices, and channels.</p></div>
+  <div class="memorySteps">
+    <article><h3>Identity stability</h3><p>Preserve the identity and goals that an agent carries from one session to the next.</p></article>
+    <article><h3>Behavioral drift</h3><p>Track changes in preferences, goals, relationships, and behavior over time.</p></article>
+    <article><h3>Cross-channel coherence</h3><p>Carry authorized persona context across APIs, apps, devices, and workflows.</p></article>
+  </div>
+  <aside class="directionNote"><h3>Persona Continuity Score</h3><p>A product direction for measuring how consistently an intelligent system preserves these traits over time. Availability of a scoring API is subject to the preview roadmap.</p></aside>
+</section>`
+  },
+  '/capabilities': {
+    label: 'Capabilities',
+    title: 'The layers of Agentic Memory',
+    description: 'Explore 1db memory layers, temporal cognition, relationships, trust, and the roadmap for decay, reinforcement, and simulation.',
+    intro: '1db connects memory with identity, relationships, trust, context, and time so agents can act with an understanding of what came before.',
+    body: `
+<section class="homeSection" id="memory-layers">
+  <div class="sectionIntro"><h2>Memory at every level of a task.</h2><p>The 1db memory model describes the different kinds of context that contribute to persistent agency.</p></div>
+  <dl class="detailList">
+    <div><dt>Working Memory</dt><dd>Context relevant to the current task, actor, and goal.</dd></div>
+    <div><dt>Episodic Memory</dt><dd>Observed events, decisions, actions, and outcomes with their source and time.</dd></div>
+    <div><dt>Semantic Memory</dt><dd>Facts, concepts, and knowledge that give events meaning.</dd></div>
+    <div><dt>Relationship Memory</dt><dd>Connections between people, agents, projects, and other entities.</dd></div>
+    <div><dt>Identity Memory</dt><dd>Continuity of preferences, goals, and persona traits across sessions.</dd></div>
+    <div><dt>Temporal Memory</dt><dd>Sequence, change, and the history behind the current state.</dd></div>
+    <div><dt>Predictive / Simulation Memory</dt><dd>A roadmap layer for retaining hypothetical branches and projected outcomes.</dd></div>
+  </dl>
+</section>
+<section class="homeSection" id="time">
+  <div class="sectionIntro"><p class="homeEyebrow">Temporal cognition</p><h2>Continuity exists across time.</h2><p>1db treats time as semantic change. What happened, when it happened, why it mattered, what changed, what it influenced, and how meaning evolved.</p></div>
+  <div class="memorySteps">
+    <article><h3>Chronology</h3><p>Events are understood in sequence, with versioned state and checkpoint history.</p></article>
+    <article><h3>Causality</h3><p>Facts can point to causes, effects, contradictions, reinforcements, and downstream consequences.</p></article>
+    <article><h3>Relevance</h3><p>The memory model accounts for importance, recency, reinforcement, and how relevance changes over time.</p></article>
+  </div>
+</section>
+<section class="homeSection" id="primitives">
+  <div class="sectionIntro"><h2>First-class concepts for persistent agency.</h2></div>
+  <dl class="detailList">
+    <div><dt>Communication events</dt><dd>Messages, actions, tool calls, file changes, decisions, state transitions, and outcomes captured as first-class events.</dd></div>
+    <div><dt>Memory</dt><dd>Durable, scoped, provenance-aware representations of meaningful communication or observed state.</dd></div>
+    <div><dt>Identity</dt><dd>Continuity patterns that persist across communication, behavior, time, and relationships.</dd></div>
+    <div><dt>Relationships</dt><dd>Weighted paths of relevance, trust, permission, dependency, and meaning between entities.</dd></div>
+    <div><dt>Context</dt><dd>Compiled local state for this actor, this situation, this goal, and these permissions.</dd></div>
+    <div><dt>Trust</dt><dd>Confidence based on provenance, repetition, contradiction, source quality, relationship, and freshness.</dd></div>
+    <div><dt>Time</dt><dd>Sequence, causality, decay, reinforcement, contradiction, correction, and evolution.</dd></div>
+    <div><dt>Governance</dt><dd>Tenant boundaries, consent, recall scope, retention, permissions, and auditability as cognitive primitives.</dd></div>
+  </dl>
+</section>
+<section class="homeSection homeSplit" id="memory-lifecycle">
+  <div class="sectionIntro"><p class="homeEyebrow">Evolving significance</p><h2>Memory can change as the work changes.</h2><p>The broader cognitive model includes confidence scoring, contradiction resolution, semantic strengthening, contextual prioritization, importance weighting, memory merging, and memory aging.</p></div>
+  <div class="contentPanel"><h3>Decay and reinforcement</h3><p>Some memories lose relevance. Repeated evidence can strengthen an association, while corrections can change the context an agent should use.</p><p>These lifecycle operations describe the product direction. Preview integrations should use the routes documented in the API reference.</p><a class="homeLink" href="/docs">See the current APIs ↗</a></div>
+</section>
+<section class="homeSection" id="simulation">
+  <div class="sectionIntro"><p class="homeEyebrow">Roadmap · simulation and future reasoning</p><h2>Explore what could happen next.</h2><p>Potential capability includes hypothetical branches, projected outcomes, future-state reasoning, comparative simulations, retained reasoning paths, and temporal scenario analysis as the simulation layer matures.</p></div>
+</section>`
+  },
+  '/architecture': {
+    label: 'Architecture',
+    title: 'From communication to durable cognition',
+    description: 'Understand how 1db Agentic Memory connects communication events, the cognition graph, temporal context, and authorized retrieval for agent runtimes.',
+    intro: 'NodeVertex lets everything communicate. 1db lets the fabric remember what communication means. Agentic Memory connects observed activity to the context an agent needs at the moment of action.',
+    body: `
+<section class="homeSection" id="flow">
+  <div class="sectionIntro"><h2>Observe. Remember. Compile.</h2><p>1db observes communication events, converts meaningful activity into durable cognitive state, and compiles relevant context for authorized agents and systems.</p></div>
+  <ol class="architectureFlow">
+    <li><h3>Communication fabric</h3><p>NodeVertex provides addressability, transport, routing, live coordination, and programmable communication endpoints.</p></li>
+    <li><h3>1db Event Layer</h3><p>Observed communication, actions, state changes, outcomes, tool calls, workflow events, and provenance envelopes.</p></li>
+    <li><h3>1db Cognition Graph</h3><p>Entities, memories, relationships, concepts, identity signals, trust signals, and evidence links.</p></li>
+    <li><h3>1db Temporal Layer</h3><p>Sequence and state changes provide the foundation for reasoning about causality, contradiction, correction, and evolution.</p></li>
+    <li><h3>1db Context Compiler</h3><p>Task-ready context scoped by actor, goal, tenant, and permission, with exact checkpoint provenance.</p></li>
+    <li><h3>Agent Runtime</h3><p>The agent uses retrieved context to continue reasoning, acting, and communicating through live endpoints.</p></li>
+  </ol>
+</section>
+<section class="homeSection" id="cognition-graph">
+  <div class="sectionIntro"><p class="homeEyebrow">Cognition graph</p><h2>Concepts become explainable associations.</h2><p>A cognition graph begins with facts, then connects them through relationships whose strength changes the result. The same inputs can produce different outcomes when the association weight shifts.</p></div>
+  <figure class="graphFigure">
+    <img src="/assets/cognition-graph.png" width="1536" height="1024" loading="lazy" alt="Illustrative cognition graph connecting water, cold, ice, oil, and heat through weighted associations.">
+    <figcaption>Illustrative associations show how a concept connects to conditions, relationships, and possible outcomes.</figcaption>
+  </figure>
+  <div class="memorySteps">
+    <article><h3>Fact</h3><p>Water exists.</p></article>
+    <article><h3>Association</h3><p>Water and cold are linked to ice.</p></article>
+    <article><h3>Weighted association</h3><p>The strength of the relationship changes which connected concepts become relevant.</p></article>
+  </div>
+</section>
+<section class="homeSection homeSplit" id="context-packets">
+  <div class="sectionIntro"><h2>Context with a recoverable history.</h2><p>Context packets preserve selected checkpoint identifiers, versions, integrity hashes, and exact state. An incoming agent can recover the context behind a handoff and check the evidence it references.</p><a class="homeLink" href="/docs">Integrate context retrieval ↗</a></div>
+  <dl class="architectureList">
+    <div><dt>Observe</dt><dd>Ingest communication and state-change events.</dd></div>
+    <div><dt>Checkpoint</dt><dd>Persist versioned continuity for a project or collaboration scope.</dd></div>
+    <div><dt>Retrieve</dt><dd>Compile authorized context for a question and read back the resulting packet.</dd></div>
+  </dl>
+</section>`
+  },
+  '/governance': {
+    label: 'Governance',
+    title: 'Agentic Memory with boundaries',
+    description: 'Learn about provenance, tenant boundaries, scoped recall, versioned evidence, and the governance principles behind 1db Agentic Memory.',
+    intro: 'Memory needs a source, a scope, and a history. 1db checks access before returning context and preserves the checkpoint provenance behind a handoff.',
+    body: `
+<section class="homeSection" id="access">
+  <div class="sectionIntro"><h2>Scoped access to shared memory.</h2><p>Use a signed-in 1db session or a tenant application credential with the required read or write scope. Each request is bound to the authenticated tenant.</p></div>
+  <div class="memorySteps">
+    <article><h3>Tenant boundaries</h3><p>Tenant identifiers select context. Access follows the authenticated tenant and credential scopes.</p></article>
+    <article><h3>Private continuity</h3><p>Private scopes require owner access or an explicit reader policy. Shared context follows the permissions set for that scope.</p></article>
+    <article><h3>Exact provenance</h3><p>Packets record the checkpoint identifiers, versions, and integrity hashes used to compile them.</p></article>
+  </div>
+</section>
+<section class="homeSection" id="principles">
+  <div class="sectionIntro"><h2>Cognition needs boundaries.</h2><p>These governance principles guide how the memory model develops.</p></div>
+  <dl class="detailList">
+    <div><dt>Provenance</dt><dd>Durable memory should trace back to observed communication, state, actor, source, time, and evidence.</dd></div>
+    <div><dt>Recall scope</dt><dd>Context compilation must respect tenant boundaries, permissions, task purpose, consent, and channel constraints.</dd></div>
+    <div><dt>Identity drift</dt><dd>Identity is a continuity pattern across behavior, preferences, goals, and relationships. Divergence and reinforcement both matter.</dd></div>
+    <div><dt>Contradiction handling</dt><dd>Compiled context should account for unresolved contradictions, deprecated memories, and low-confidence claims.</dd></div>
+    <div><dt>Relevance over time</dt><dd>Some memories lose relevance. Decay and reinforcement are part of the cognitive model.</dd></div>
+  </dl>
+</section>
+<section class="homeSection homeSplit" id="handoffs">
+  <div class="sectionIntro"><h2>Preserve responsibility with the context.</h2><p>Portable collaboration packets retain owners, responsibilities, decisions, and evidence. The executing application independently verifies the authority references recorded in a packet.</p><a class="homeLink" href="/docs">Read the authentication and continuity docs ↗</a></div>
+  <div class="contentPanel"><h3>Versioned handoffs</h3><p>Pin a known checkpoint when requesting context. Version checks help a handoff detect that the state changed before it continues.</p><p>Private persona continuity may also require a trusted service credential, according to the scope’s access policy.</p></div>
+</section>`
+  }
+};
+
+export function productPage(path) {
+  const content = productPages[path];
+  if (!content) return null;
+  const title = `${content.label} | 1db Agentic Memory`;
+  const canonical = `https://1db.io${path}`;
+  const related = Object.entries(productPages)
+    .filter(([href]) => href !== path)
+    .map(([href, item]) => `<a class="homeLink" href="${href}">${esc(item.label)} <span aria-hidden="true">↗</span></a>`)
+    .join('');
+  return page(`
+<a class="skipLink" href="#main-content">Skip to content</a>
+${nav(content.label)}
+<main id="main-content">
+  <header class="contentHero">
+    <p class="homeEyebrow">1db Agentic Memory · ${esc(content.label)}</p>
+    <h1>${esc(content.title)}</h1>
+    <p class="heroDetail">${esc(content.intro)}</p>
+  </header>
+  ${content.body}
+  <nav class="relatedPages" aria-label="Explore 1db">${related}</nav>
+  <section class="previewCallout">
+    <div class="sectionIntro"><h2>Build with 1db Agentic Memory.</h2><p>Request private preview access for your agent workflow.</p></div>
+    <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
+  </section>
+</main>`, title, {
+    bodyClass: 'homePage productPage',
+    head: `<meta name="description" content="${esc(content.description)}">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="1db">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(content.description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="https://1db.io/assets/agentic-memory-hero.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/assets/home.css">`
   });
