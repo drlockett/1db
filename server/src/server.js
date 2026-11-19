@@ -27,11 +27,16 @@ const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
 const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken;
 const publicDir = normalize(join(dirname(fileURLToPath(import.meta.url)), '..', 'public'));
 const brandAssets = new Map([
-  ['/assets/logo-1db.png', ['logo-1db.png', 'image/png']],
-  ['/favicon.ico', ['favicon.ico', 'image/x-icon']],
-  ['/assets/favicon-32.png', ['favicon-32.png', 'image/png']],
-  ['/assets/favicon-16.png', ['favicon-16.png', 'image/png']],
-  ['/assets/apple-touch-icon.png', ['apple-touch-icon.png', 'image/png']]
+  ['/assets/logo-1db.png', ['logo-1db-hex.png', 'image/png']],
+  ['/assets/logo-1db-hex.png', ['logo-1db-hex.png', 'image/png']],
+  ['/assets/favicon-32.png', ['favicon-hex-32.png', 'image/png']],
+  ['/assets/favicon-hex-32.png', ['favicon-hex-32.png', 'image/png']],
+  ['/assets/favicon-16.png', ['favicon-hex-16.png', 'image/png']],
+  ['/assets/favicon-hex-16.png', ['favicon-hex-16.png', 'image/png']],
+  ['/assets/apple-touch-icon.png', ['apple-touch-icon-hex.png', 'image/png']],
+  ['/assets/apple-touch-icon-hex.png', ['apple-touch-icon-hex.png', 'image/png']],
+  ['/favicon.ico', ['favicon-hex.ico', 'image/x-icon']],
+  ['/favicon-hex.ico', ['favicon-hex.ico', 'image/x-icon']]
 ]);
 
 const allowedOrigins = new Set([
