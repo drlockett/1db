@@ -26,6 +26,13 @@ const appKey = process.env.ONE_DB_APPLICATION_KEY || '1db';
 const oneDbApplicationId = Number(process.env.ONE_DB_APPLICATION_ID || 20005);
 const sessionSecret = process.env.ONE_DB_SESSION_SECRET || process.env.SESSION_SECRET || sapiToken;
 const publicDir = normalize(join(dirname(fileURLToPath(import.meta.url)), '..', 'public'));
+const brandAssets = new Map([
+  ['/assets/logo-1db.png', ['logo-1db.png', 'image/png']],
+  ['/favicon.ico', ['favicon.ico', 'image/x-icon']],
+  ['/assets/favicon-32.png', ['favicon-32.png', 'image/png']],
+  ['/assets/favicon-16.png', ['favicon-16.png', 'image/png']],
+  ['/assets/apple-touch-icon.png', ['apple-touch-icon.png', 'image/png']]
+]);
 
 const allowedOrigins = new Set([
   publicOrigin,
@@ -295,6 +302,10 @@ const server = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
+    if (brandAssets.has(url.pathname) && ['GET', 'HEAD'].includes(req.method)) {
+      const [name, contentType] = brandAssets.get(url.pathname);
+      return asset(res, name, contentType, req.method === 'HEAD', 'public, max-age=3600');
+    }
     if (['/continuity', '/capabilities', '/architecture', '/governance'].includes(url.pathname) && ['GET', 'HEAD'].includes(req.method)) {
       if (req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
       return html(res, 200, productPage(url.pathname));

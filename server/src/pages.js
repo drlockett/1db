@@ -49,9 +49,18 @@ function page(body, title = '1db.io', { head = '', bodyClass = '' } = {}) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#153e34">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/assets/favicon-32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/assets/favicon-16.png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" sizes="180x180">
   <title>${esc(title)}</title>
   ${head}
-  <style>${style()}${cognitionStyle()}</style>
+  <style>${style()}${cognitionStyle()}
+  .brand{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+  .brandMark{display:block;width:34px;height:34px;flex-shrink:0;border-radius:7px}
+  .adminSide .brand{display:flex}
+  </style>
 </head>
 <body${bodyClass ? ` class="${esc(bodyClass)}"` : ''}>${body}<footer class="siteFooter">&copy; 2026 <a href="https://noderunner.llc">NodeRunner, LLC</a></footer></body>
 </html>`;
@@ -59,7 +68,11 @@ function page(body, title = '1db.io', { head = '', bodyClass = '' } = {}) {
 
 function nav(active = '') {
   const link = (href, text) => `<a href="${href}"${active === text ? ' aria-current="page"' : ''}>${text}</a>`;
-  return `<header class="nav"><a class="brand" href="/">1db.io</a><nav aria-label="Main navigation">${link('/continuity', 'Continuity')}${link('/capabilities', 'Capabilities')}${link('/architecture', 'Architecture')}${link('/governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
+  return `<header class="nav"><a class="brand" href="/" aria-label="1db home">${brandLogo()}</a><nav aria-label="Main navigation">${link('/continuity', 'Continuity')}${link('/capabilities', 'Capabilities')}${link('/architecture', 'Architecture')}${link('/governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
+}
+
+function brandLogo() {
+  return '<img class="brandMark" src="/assets/logo-1db.png" width="34" height="34" alt=""><span>1db</span>';
 }
 
 const memoryLayers = [
@@ -508,7 +521,7 @@ export function adminPage(session) {
   ];
   return page(`<div class="adminShell">
 <aside class="adminSide">
-  <a class="brand" href="/admin">1db.io</a>
+  <a class="brand" href="/admin" aria-label="1db administration">${brandLogo()}</a>
   <nav class="adminNav" aria-label="Tenant admin">
     <a href="#overview" aria-current="page">Overview</a>
     <a href="#cognition-graph">Cognition Graph</a>
