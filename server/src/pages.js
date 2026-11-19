@@ -38,16 +38,17 @@ function cognitionStyle() {
 `;
 }
 
-function page(body, title = '1db.io') {
+function page(body, title = '1db.io', { head = '', bodyClass = '' } = {}) {
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${esc(title)}</title>
+  ${head}
   <style>${style()}${cognitionStyle()}</style>
 </head>
-<body>${body}<footer class="siteFooter">&copy; 2026 <a href="https://noderunner.llc">NodeRunner, LLC</a></footer></body>
+<body${bodyClass ? ` class="${esc(bodyClass)}"` : ''}>${body}<footer class="siteFooter">&copy; 2026 <a href="https://noderunner.llc">NodeRunner, LLC</a></footer></body>
 </html>`;
 }
 
@@ -56,79 +57,122 @@ function nav(active = '') {
   return `<header class="nav"><a class="brand" href="/">1db.io</a><nav>${link('/#continuity', 'Continuity')}${link('/#capabilities', 'Capabilities')}${link('/#architecture', 'Architecture')}${link('/#governance', 'Governance')}${link('/docs', 'Docs')}${link('/waitlist', 'Waitlist')}<a class="btn alt" href="/signin">Sign in</a></nav></header>`;
 }
 
-function graphVisual() {
-  return `<img class="heroGraphic" src="/assets/learns.png" width="1494" height="1052" alt="1db persistent intelligence surrounded by identity, knowledge, memory, relationships, projects, goals, and events.">`;
-}
-
 export function homePage() {
-  const caps = [
-    'Observe communication events, tool calls, workflow transitions, file changes, decisions, and outcomes with provenance.',
-    'Convert meaningful communication into scoped memory, identity signals, relationship paths, trust evidence, and temporal state.',
-    'Compile task-ready context packets for agents based on actor, goal, permissions, channel, and current contradictions.',
-    'Preserve continuity across people, agents, projects, workflows, files, systems, and organizations.'
-  ];
-  const primitives = [
-    ['Communication events', 'Messages, actions, tool calls, file changes, decisions, state transitions, and outcomes captured as first-class events.'],
-    ['Memory', 'Durable, scoped, provenance-aware representations of meaningful communication or observed state.'],
-    ['Identity', 'Continuity patterns that persist across communication, behavior, time, and relationships.'],
-    ['Relationships', 'Weighted paths of relevance, trust, permission, dependency, and meaning between entities.'],
-    ['Context', 'Compiled local state for this actor, this situation, this goal, and these permissions.'],
-    ['Trust', 'Confidence based on provenance, repetition, contradiction, source quality, relationship, and freshness.'],
-    ['Time', 'Sequence, causality, decay, reinforcement, contradiction, correction, and evolution.'],
-    ['Simulation', 'Projected communication or action futures based on current memory, identity, relationships, goals, and constraints.'],
-    ['Governance', 'Tenant boundaries, consent, recall scope, retention, permissions, and auditability as cognitive primitives.']
-  ];
-  const layers = ['Working Memory', 'Episodic Memory', 'Semantic Memory', 'Relationship Memory', 'Identity Memory', 'Temporal Memory', 'Predictive / Simulation Memory'];
-  const cognitionLayers = [
-    ['Personal Cognition', 'What an AI knows about an individual.'],
-    ['Team Cognition', 'What an AI knows about a group or organization.'],
-    ['Project Cognition', 'How an AI should operate within a specific project or workspace.'],
-    ['Persona Cognition', 'What makes a particular AI persona unique.'],
-    ['Organizational Cognition', 'Policies, standards, governance, and institutional knowledge.']
-  ];
-  return page(`${nav()}<main>
-<section class="hero heroGrid"><div><p class="pill">Semantic persistence</p><h1>The continuity layer for the communication fabric.</h1><p class="lead">1DB turns communication events into durable cognition so agents, people, projects, files, workflows, and systems can act with situated memory instead of isolated recall.</p><p class="muted">Node Vertex lets everything communicate. 1DB lets the fabric remember what communication means.</p><p><a class="btn" href="/openapi.json">Explore API</a> <a class="btn ghost" href="#architecture">Read Architecture</a> <a class="btn alt" href="/waitlist">Join Waitlist</a></p><ul class="muted"><li>Observe communication and state changes with provenance, scope, and actor context.</li><li>Preserve identity, relationships, trust, causality, and change across time.</li><li>Compile task-ready context packets for agents at the moment of action.</li></ul><p class="live">Live private preview</p></div>${graphVisual()}</section>
-<section id="continuity" class="hero band"><p class="kicker">Core narrative</p><h2>Communication + Memory + Time + Identity = Persistent Agency.</h2><p class="lead">Communication is the primitive. Memory is the residue of communication. 1DB converts that residue into durable cognition: identity, relationships, trust, context, temporal causality, governance, and simulation.</p><div class="grid"><article class="card"><h3>Not chat history</h3><p>1DB is not a transcript archive or session store. It preserves what communication means across actors, projects, permissions, and time.</p></article><article class="card"><h3>Not vector recall</h3><p>Similarity search can find nearby text. It cannot decide scope, provenance, contradiction, identity drift, or current trust by itself.</p></article><article class="card"><h3>Persistent cognition</h3><p>Memory becomes an evolving substrate that can strengthen, decay, contradict, correct, and participate in future action.</p></article></div></section>
-<section id="session-amnesia" class="hero"><p class="kicker">Eliminate session amnesia</p><h2>Stop re-training your agents every session.</h2><p class="lead">AI systems often begin each new conversation with incomplete operational context. Users repeat how a project is structured, which tools are required, what actions are prohibited, how deployments work, and which team conventions matter.</p><div class="grid"><article class="card"><h3>Friction</h3><p>Repeated setup slows every new session and wastes expert attention.</p></article><article class="card"><h3>Inconsistency</h3><p>Critical standards and preferences drift when context is reconstructed by memory or copied from old prompts.</p></article><article class="card"><h3>Operational risk</h3><p>As projects grow, forgotten deployment, security, and workflow constraints become execution hazards.</p></article></div></section>
-<section id="project-cognition" class="hero split"><div><p class="kicker">Project Cognition</p><h2>Project communication becomes reliable execution context.</h2><p class="lead">Project Cognition is persistent, versioned execution continuity for how an AI should operate within a project, team, workspace, tenant, repository, environment, or domain.</p><p class="muted">Architecture, workflows, constraints, standards, preferences, security requirements, and operating procedures become durable context instead of repeated instructions.</p></div><div class="card"><h3>Before 1DB</h3><ul><li>Use this repository.</li><li>Follow these deployment procedures.</li><li>Use these tools.</li><li>Avoid these actions.</li><li>Respect these organizational requirements.</li></ul><h3>After 1DB</h3><pre><code>const cognition =
-  await cognition.loadProject("project-alpha");</code></pre><p class="muted">The AI starts with the correct project-aware intelligence.</p></div></section>
-<section class="hero band"><p class="kicker">Cognitive layers</p><h2>Durable cognition for AI systems.</h2><p class="lead">1DB stores continuity at the layers where intelligent systems actually operate: people, teams, projects, personas, organizations, workflows, and communication endpoints.</p><div class="grid">${cognitionLayers.map(([title, detail]) => `<article class="card"><h3>${title}</h3><p>${detail}</p></article>`).join('')}</div></section>
-<section id="what" class="hero"><p class="kicker">What is 1DB?</p><h2>Semantic persistence for persistent agency.</h2><p class="lead">1DB observes communication events, converts meaningful activity into durable cognitive state, and compiles relevant context for authorized agents and systems. It is cognitive infrastructure for the Agent Internet.</p><div class="grid">${caps.map(c => `<article class="card"><p>${c}</p></article>`).join('')}</div></section>
-<section class="hero band"><p class="kicker">Cognition graph</p><h2>Concepts become explainable associations.</h2><p class="lead">A cognition graph begins with facts, then connects them through relationships whose strength changes the result. The same inputs can produce different outcomes when the association weight shifts.</p><div class="cognitionDemo"><img class="cognitionImage" src="/assets/cognition-graph.png" width="1536" height="1024" alt="Cognition graph network showing water, cold, ice, oil, heat, and black ice with weighted associations and example inference results."><div class="cognitionRules"><article class="ruleCard"><h3>Fact</h3><p>Water exists.</p></article><article class="ruleCard"><h3>Association</h3><code>water + cold -> ice</code></article><article class="ruleCard"><h3>Weighted association</h3><code>water <span class="weight">1.0</span> + cold <span class="weight">0.25</span> -> cool water</code><code>water <span class="weight">1.0</span> + cold <span class="weight">0.90</span> -> ice</code><code>ice + oil + road -> black ice</code></article></div></div></section>
-<section id="memory" class="hero split"><div><p class="kicker">Why 1DB?</p><h2>Memory is not enough when agents have to act.</h2><p class="muted">Ordinary memory stores claims. Vector search finds similarity. Chat history preserves transcripts. RAG retrieves documents. 1DB preserves scoped, provenance-aware cognition that can evolve across time, identity, trust, relationships, and permissions.</p></div><div class="card memory">${layers.map((layer, i) => `<div class="rowx"><strong>${layer}</strong><span class="stream" style="animation-delay:${i * .25}s"></span></div>`).join('')}<pre><code>{ layer: "temporal", entity: "acme", event: "security review changed priority", caused_by: "new residency requirement", confidence: 0.84, scope: "project" }</code></pre></div></section>
-<section id="time" class="hero band"><p class="kicker">Temporal cognition</p><h2>Continuity exists across time.</h2><p class="lead">1DB treats time as semantic change: what happened, when it happened, why it mattered, what changed, what it influenced, and how meaning evolved.</p><div class="grid"><article><div class="stat">Chronology</div><p class="muted">Events are understood in sequence, not as disconnected records.</p></article><article><div class="stat">Causality</div><p class="muted">Facts can point to causes, effects, contradictions, reinforcements, and downstream consequences.</p></article><article><div class="stat">Relevance</div><p class="muted">Context changes over time through decay curves, reinforcement, importance, and recency.</p></article></div></section>
-<section class="hero split"><div><p class="kicker">Evolving significance</p><h2>Memory is not static storage.</h2><p class="lead">It is evolving significance.</p><p class="muted">1DB treats decay and reinforcement as cognitive infrastructure primitives: confidence scoring, contradiction resolution, semantic strengthening, contextual prioritization, importance weighting, memory merging, and memory aging.</p></div><div class="card"><h3>Memory lifecycle</h3><pre><code>await db.memory.remember(fact)
-await db.identity.reinforce(signal)
-await db.memory.decay({ curve: "contextual" })
-await db.relationship.merge(conflict)
-await db.timeline.query({ relevance: "now" })</code></pre></div></section>
-<section class="hero"><p class="kicker">Persona continuity primitive</p><h2>Persona Continuity Score</h2><p class="lead">Measure how consistently an intelligent system preserves tone, memory, identity, goals, relationships, preferences, and behavioral traits across sessions, devices, channels, and years.</p><div class="grid"><article class="card"><h3>Identity stability</h3><p>Continuity is tracked as infrastructure, not as a branded personal assistant experience.</p></article><article class="card"><h3>Behavioral drift</h3><p>Systems can observe where tone, preferences, goals, or memory diverge from prior state.</p></article><article class="card"><h3>Cross-channel coherence</h3><p>Agents can remain consistent across APIs, apps, devices, workflows, and organizations.</p></article></div></section>
-<section class="hero split"><div><p class="kicker">Simulation and future reasoning</p><h2>Continuity is not only about what happened. It is also about what could happen.</h2><p class="muted">Potential capability: 1DB can model hypothetical branches, projected outcomes, future-state reasoning, comparative simulations, retained reasoning paths, and temporal scenario analysis as the simulation layer matures.</p></div><div class="card"><pre><code>await db.simulation.project({
-  entity: "supply-chain",
-  horizon: "90d",
-  branches: ["delay", "price shock", "new supplier"],
-  retain_reasoning: true
-})</code></pre></div></section>
-<section class="hero band"><p class="kicker">Enterprise cognition</p><h2>Companies forget too.</h2><p class="lead">Institutional continuity disappears through turnover, disconnected systems, siloed applications, and fragmented AI tooling. 1DB creates shared organizational cognition across humans, agents, applications, infrastructure, workflows, and distributed systems.</p><div class="grid"><article><div class="stat">Collective memory</div><p class="muted">Teams and agents share durable context instead of re-learning the same facts.</p></article><article><div class="stat">Semantic propagation</div><p class="muted">New knowledge updates the graph and becomes available to authorized systems in realtime.</p></article><article><div class="stat">Distributed reasoning</div><p class="muted">Multiple agents coordinate around shared facts, goals, context, and temporal state.</p></article></div></section>
-<section id="architecture" class="hero"><p class="kicker">Architecture</p><h2>Node Vertex lets everything communicate. 1DB lets the fabric remember what communication means.</h2><div class="grid"><article class="card"><h3>Node Vertex</h3><p class="muted">Addressability, transport, routing, live coordination, governance surfaces, and programmable communication endpoints.</p></article><article class="card"><h3>1DB Event Layer</h3><p class="muted">Observed communication, actions, state changes, outcomes, tool calls, workflow events, and provenance envelopes.</p></article><article class="card"><h3>1DB Cognition Graph</h3><p class="muted">Entities, memories, relationships, concepts, identity signals, trust signals, and evidence links.</p></article><article class="card"><h3>1DB Temporal Layer</h3><p class="muted">Sequence, causality, decay, reinforcement, contradiction, correction, and evolution.</p></article><article class="card"><h3>1DB Context Compiler</h3><p class="muted">Task-ready fabric state scoped by actor, goal, channel, tenant, and permission.</p></article><article class="card"><h3>Agent Runtime</h3><p class="muted">Action, reasoning, simulation, and communication through live endpoints.</p></article></div></section>
-<section id="capabilities" class="hero"><p class="kicker">CFT primitives</p><h2>First-class concepts for persistent agency.</h2><div class="grid">${primitives.map(([a, b]) => `<article class="card"><h3>${a}</h3><p>${b}</p></article>`).join('')}</div></section>
-<section id="compare" class="hero"><p class="kicker">Before and after</p><h2>1DB is not a vector database with nicer branding.</h2><div class="card"><table><thead><tr><th>Old framing</th><th>CFT-native framing</th></tr></thead><tbody><tr><td>AI memory database</td><td>Semantic persistence layer for the communication fabric</td></tr><tr><td>Give AI memory</td><td>Give the fabric continuity</td></tr><tr><td>Store and retrieve memories</td><td>Observe communication, persist cognition, compile context</td></tr><tr><td>AI + Memory = Persona</td><td>Communication + Memory + Time + Identity = Persistent Agency</td></tr><tr><td>Vector memory</td><td>Memory, identity, relationships, trust, context, time, and governance</td></tr><tr><td>Persona profile</td><td>Identity continuity pattern across behavior, communication, relationships, and drift</td></tr></tbody></table></div></section>
-<section id="governance" class="hero band"><p class="kicker">Trust and governance</p><h2>Cognition needs boundaries.</h2><div class="grid"><article class="card"><h3>No memory without provenance</h3><p>Durable memory should trace back to observed communication, state, actor, source, time, and evidence.</p></article><article class="card"><h3>No recall without scope</h3><p>Context compilation must respect tenant boundaries, permissions, task purpose, consent, and channel constraints.</p></article><article class="card"><h3>No identity without drift control</h3><p>Identity is a continuity pattern, not a static profile. Divergence and reinforcement both matter.</p></article><article class="card"><h3>No context without contradiction handling</h3><p>Compiled context should account for unresolved contradictions, deprecated memories, and low-confidence claims.</p></article><article class="card"><h3>No intelligence without decay</h3><p>Some memories lose relevance. Decay and reinforcement are core cognitive operations.</p></article></div></section>
-<section class="hero split"><div><p class="quote">Databases were built for applications. 1DB is built for persistent agency.</p></div><div class="card"><p class="kicker">Cognitive API direction</p><h2>Observe. Remember. Compile.</h2><pre><code>db.observe(event)
-db.memory.remember(observation)
-db.identity.reinforce(actor, signal)
-db.relationship.link(a, b, meaning)
-db.context.compile(situation)
-db.trust.evaluate(claim)
-db.temporal.reconstruct(entity)
-db.simulation.project(goal)</code></pre></div></section>
-<section class="hero band"><p class="kicker">Private preview</p><h2>Build agents with situated continuity.</h2><p class="lead">Join the 1DB waitlist for early access to semantic persistence, scoped context, relationship-aware cognition, temporal awareness, and agent continuity.</p><p><a class="btn" href="/waitlist">Join Waitlist</a></p></section>
-</main>`, '1db.io - Semantic Persistence for the Communication Fabric');
+  const title = '1db | Agentic Memory';
+  const description = '1db is Agentic Memory for AI agents. Record decisions and events, preserve project context, and retrieve authorized memory across sessions and handoffs.';
+  const heroImage = '/assets/agentic-memory-hero.jpg';
+  const canonical = 'https://1db.io/';
+  const imageAlt = 'Layers of smoked glass connected by mint traces, illustrating memory carried across sessions.';
+  const contextRequest = JSON.stringify({
+    projectId: 'release-review',
+    query: 'What still needs approval?'
+  }, null, 2);
+
+  return page(`
+<a class="skipLink" href="#main-content">Skip to content</a>
+${nav()}
+<main id="main-content">
+  <section class="homeHero" aria-labelledby="home-title">
+    <div class="heroCopy">
+      <p class="homeEyebrow">Private preview</p>
+      <h1 id="home-title">Agentic Memory<br>by 1db</h1>
+      <p class="heroLead">Give AI agents the context to pick up where work left off.</p>
+      <p class="heroDetail">1db captures decisions, events, and project knowledge, then retrieves the context an agent is authorized to use in its next session or handoff.</p>
+      <div class="homeActions">
+        <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
+        <a class="homeButton secondary" href="/docs">Read developer docs</a>
+      </div>
+    </div>
+    <figure class="homeArtwork">
+      <img src="${heroImage}" width="1448" height="1086" alt="${esc(imageAlt)}" fetchpriority="high">
+    </figure>
+  </section>
+
+  <section class="homeSection" id="continuity" aria-labelledby="continuity-title">
+    <span id="session-amnesia" class="homeAnchor"></span>
+    <span id="what" class="homeAnchor"></span>
+    <div class="sectionIntro">
+      <h2 id="continuity-title">How Agentic Memory works</h2>
+      <p>Keep the decisions, constraints, and open work that an agent needs to resume a task.</p>
+    </div>
+    <div class="memorySteps" id="capabilities">
+      <article>
+        <h3>Record what happened</h3>
+        <p>Capture messages, tool calls, decisions, and outcomes with their source and timestamp.</p>
+      </article>
+      <article>
+        <h3>Preserve what changed</h3>
+        <p>Save versioned checkpoints so the next session can recover project state, responsibilities, and open work.</p>
+      </article>
+      <article>
+        <h3>Retrieve context for the task</h3>
+        <p>Request an authorized context packet for the project and question at hand, with references to the checkpoints used.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="homeSection homeSplit" id="project-cognition" aria-labelledby="project-title">
+    <div class="sectionIntro">
+      <p class="homeEyebrow">Project Cognition</p>
+      <h2 id="project-title">Pick up a release review in a new session.</h2>
+      <p>A handoff can carry the approved changes, the owner of each open item, and the evidence a reviewer needs. The incoming agent can ask what still needs approval and retrieve context for that release.</p>
+      <a class="homeLink" href="/openapi.json">View OpenAPI reference <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="apiExample" aria-label="Example context retrieval request">
+      <div class="apiEndpoint"><span>POST</span> <code>/api/v1/cognition/context/retrieve</code></div>
+      <pre><code>${esc(contextRequest)}</code></pre>
+    </div>
+  </section>
+
+  <section class="homeSection homeSplit" id="architecture" aria-labelledby="architecture-title">
+    <span id="memory" class="homeAnchor"></span>
+    <span id="time" class="homeAnchor"></span>
+    <div class="sectionIntro">
+      <h2 id="architecture-title">Memory across agents and sessions.</h2>
+      <p>1db provides the memory layer for agent workflows. When agents communicate through NodeVertex, 1db can preserve the decisions and project state that need to outlast a conversation.</p>
+    </div>
+    <dl class="architectureList">
+      <div><dt>Scope</dt><dd>Retrieve context for the relevant project, persona, or collaboration.</dd></div>
+      <div><dt>Version history</dt><dd>Pin a known checkpoint and recover the exact state used in a handoff.</dd></div>
+      <div><dt>Provenance</dt><dd>Trace a context packet to the checkpoint identifiers, versions, and integrity hashes used to compile it.</dd></div>
+    </dl>
+  </section>
+
+  <section class="homeSection governanceSection" id="governance" aria-labelledby="governance-title">
+    <span id="compare" class="homeAnchor"></span>
+    <div class="sectionIntro">
+      <h2 id="governance-title">Control who can read and write memory.</h2>
+      <p>1db checks tenant access and credential scopes. Private continuity scopes require owner or explicitly granted access.</p>
+      <a class="homeLink" href="/docs">Read about authentication <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+
+  <section class="previewCallout" aria-labelledby="preview-title">
+    <div class="sectionIntro">
+      <h2 id="preview-title">Build with 1db Agentic Memory.</h2>
+      <p>Request private preview access for your agent workflow.</p>
+    </div>
+    <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
+  </section>
+</main>`, title, {
+    bodyClass: 'homePage',
+    head: `<meta name="description" content="${esc(description)}">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="1db">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="${new URL(heroImage, canonical).href}">
+  <meta property="og:image:alt" content="${esc(imageAlt)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/assets/home.css">`
+  });
 }
 
 export function docsPage() {
   return page(`${nav('Docs')}<main>
-<section class="hero"><p class="pill">Developer docs</p><h1>Build on semantic persistence.</h1><p class="lead">Use 1DB to observe communication events, preserve durable cognition, and compile scoped context for agents at the moment of action.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/openapi.json">OpenAPI JSON</a></p></section>
+<section class="hero"><p class="pill">Developer docs</p><h1>Build with 1db Agentic Memory.</h1><p class="lead">Record events, save versioned project state, and retrieve authorized context for the next agent session or handoff.</p><p><a class="btn" href="/waitlist">Request access</a> <a class="btn alt" href="/openapi.json">OpenAPI JSON</a></p></section>
 <section class="card"><h2>Authenticated tenant access</h2><p>Use a signed-in 1db session or a tenant application credential with cognition:read or cognition:write scope. A tenant identifier selects context; it never grants access. Credentials and sessions cannot select another tenant.</p><p>Context retrieval can include up to eight explicit scopeRefs. Its durable packet records each selected checkpoint identifier, version and integrity hash. Private scopes require an owner or explicit reader policy. Portable collaboration packets preserve identity, outstanding responsibilities, decision references and evidence; recorded authority references must be verified before execution.</p></section>
 <section class="hero split"><div><p class="kicker">CLI</p><h2>Install the 1db command line.</h2><p class="muted">The CLI wraps the 1db REST API for creating resources from scripts, terminals, CI, and agent workflows.</p><pre><code>brew tap drlockett/1db
 brew install drlockett/1db/1db
@@ -171,7 +215,7 @@ GET  /api/project-cognition/{projectKey}/active</code></pre></article></div></se
 }
 
 export function waitlistPage(message = '') {
-  return page(`${nav('Waitlist')}<main><section class="hero split"><div><p class="pill">Private preview</p><h1>Join the 1DB waitlist.</h1><p class="lead">Get early access to semantic persistence for communication events, durable cognition, scoped context, and agent continuity.</p><p class="muted">Tell us what you want to build and we will prioritize access for teams pushing communication fabrics, persistent agency, and enterprise agent workflows forward.</p></div><form class="card" method="post" action="/waitlist"><h2>Request access</h2>${message ? `<p class="pill">${esc(message)}</p>` : ''}<label>Email <input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>What would you like to build? <textarea name="question" rows="5" placeholder="Agents, communication fabric, Project Cognition, scoped context, enterprise workflow..."></textarea></label><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-10000px" aria-hidden="true"><button type="submit">Join waitlist</button></form></section></main>`, 'Join the 1DB waitlist');
+  return page(`${nav('Waitlist')}<main><section class="hero split"><div><p class="pill">Private preview</p><h1>Join the 1db waitlist.</h1><p class="lead">Get early access to 1db Agentic Memory for your AI agents and workflows.</p><p class="muted">Tell us what you’re building and what your agents need to carry across sessions or handoffs.</p></div><form class="card" method="post" action="/waitlist"><h2>Request access</h2>${message ? `<p class="pill">${esc(message)}</p>` : ''}<label>Email <input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>What would you like to build? <textarea name="question" rows="5" placeholder="Agents, communication fabric, Project Cognition, scoped context, enterprise workflow..."></textarea></label><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-10000px" aria-hidden="true"><button type="submit">Join waitlist</button></form></section></main>`, 'Join the 1DB waitlist');
 }
 
 export function waitlistThanksPage() {
@@ -605,7 +649,7 @@ export function openApiDocument(publicOrigin = 'https://1db.io') {
     info: {
       title: '1db API',
       version: '0.2.0',
-      description: '1db private-preview API for observing communication events, preserving durable cognition, and compiling scoped context.'
+      description: 'Private-preview API for 1db Agentic Memory. Record events, preserve versioned continuity, and retrieve authorized context.'
     },
     servers: [{ url: publicOrigin }],
     components: {

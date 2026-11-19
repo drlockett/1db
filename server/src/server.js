@@ -69,7 +69,7 @@ function html(res, status, body) {
   });
 }
 
-async function asset(res, name, contentType, head = false) {
+async function asset(res, name, contentType, head = false, cacheControl = 'public, max-age=31536000, immutable') {
   const path = normalize(join(publicDir, name));
   if (!path.startsWith(publicDir)) return send(res, 404, '', { 'cache-control': 'no-store' });
   try {
@@ -77,7 +77,7 @@ async function asset(res, name, contentType, head = false) {
     return send(res, 200, head ? '' : body, {
       'content-type': contentType,
       'content-length': body.length,
-      'cache-control': 'public, max-age=31536000, immutable'
+      'cache-control': cacheControl
     });
   } catch {
     return send(res, 404, '', { 'cache-control': 'no-store' });
@@ -261,6 +261,12 @@ const server = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') return send(res, 204, '', corsFor(req));
     if (url.pathname === '/' && req.method === 'HEAD') return send(res, 200, '', { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     if (url.pathname === '/' && req.method === 'GET') return html(res, 200, homePage());
+    if (url.pathname === '/assets/home.css' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'home.css', 'text/css; charset=utf-8', req.method === 'HEAD', 'no-cache');
+    }
+    if (url.pathname === '/assets/agentic-memory-hero.jpg' && ['GET', 'HEAD'].includes(req.method)) {
+      return asset(res, 'agentic-memory-hero.jpg', 'image/jpeg', req.method === 'HEAD');
+    }
     if (url.pathname === '/assets/learns.png' && ['GET', 'HEAD'].includes(req.method)) {
       return asset(res, 'learns.png', 'image/png', req.method === 'HEAD');
     }

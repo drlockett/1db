@@ -1,0 +1,371 @@
+.homePage {
+  --ink: #122b29;
+  --text: #29433e;
+  --muted: #48605a;
+  --line: #d4e0d9;
+  --accent: #175d4e;
+  background: #f7faf7;
+  color: var(--text);
+  overflow-x: visible;
+}
+
+.homePage main {
+  max-width: 1320px;
+  padding-inline: clamp(20px, 5vw, 72px);
+}
+
+.homePage .nav {
+  padding: 16px max(clamp(20px, 5vw, 72px), calc((100vw - 1176px) / 2));
+  background: #f7faf7f5;
+  gap: 18px;
+}
+
+.homePage .nav .brand {
+  color: var(--ink);
+  font-size: 29px;
+  line-height: 1;
+}
+
+.homePage .nav nav {
+  gap: clamp(10px, 1.7vw, 24px);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.homePage .nav nav a {
+  color: var(--text);
+}
+
+.homePage .nav nav a:hover,
+.homePage .homeLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.24em;
+}
+
+.homePage .nav .btn.alt {
+  border: 1px solid #becfc5;
+  border-radius: 8px;
+  padding: 8px 13px;
+  box-shadow: none;
+  background: transparent;
+  font-weight: 700;
+}
+
+.homePage :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.skipLink {
+  position: fixed;
+  z-index: 11;
+  top: 10px;
+  left: 10px;
+  padding: 10px 16px;
+  transform: translateY(calc(-100% - 16px));
+  background: #fff;
+}
+
+.skipLink:focus {
+  transform: none;
+}
+
+.homeHero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+  padding-block: clamp(40px, 7vw, 98px);
+}
+
+.homeEyebrow {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.homePage h1,
+.homePage h2 {
+  font-weight: 750;
+  text-wrap: initial;
+}
+
+.homePage h1 {
+  margin: 0 0 22px;
+  font-size: clamp(2.9rem, 5.2vw, 4.95rem);
+  line-height: 0.99;
+  letter-spacing: -0.065em;
+}
+
+.homePage h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+
+.heroLead {
+  max-width: 29ch;
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: clamp(1.17rem, 2vw, 1.5rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.heroDetail,
+.sectionIntro > p:not(.homeEyebrow) {
+  max-width: 57ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
+.homeArtwork {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0b211f;
+  box-shadow: 0 20px 44px -28px #102f28a6;
+}
+
+.homeArtwork img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.homeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.homeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.91rem;
+  font-weight: 725;
+  text-decoration: none;
+}
+
+.homeButton:hover {
+  background: #11493e;
+}
+
+.homeButton.secondary {
+  border-color: #becfc5;
+  background: transparent;
+  color: var(--ink);
+}
+
+.homeButton.secondary:hover {
+  background: #e8f0eb;
+}
+
+.homeSection {
+  position: relative;
+  padding-block: clamp(42px, 6vw, 76px);
+  border-top: 1px solid var(--line);
+}
+
+.homePage [id] {
+  scroll-margin-top: 130px;
+}
+
+.homeAnchor {
+  position: absolute;
+  top: 0;
+}
+
+.sectionIntro h2 + p:not(.homeEyebrow) {
+  margin-top: 15px;
+}
+
+.memorySteps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.memorySteps article {
+  padding: clamp(18px, 2.5vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.memorySteps h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.memorySteps p,
+.architectureList dd {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.homeSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(24px, 6vw, 80px);
+}
+
+.homeLink {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--accent);
+  font-size: 0.94rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.apiExample {
+  min-width: 0;
+  border: 1px solid #203b35;
+  border-radius: 14px;
+  background: #112723;
+  color: #eaf4ef;
+}
+
+.apiEndpoint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 15px clamp(13px, 2.4vw, 25px);
+  border-bottom: 1px solid #476059;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.apiEndpoint span {
+  color: #a5eed2;
+  font-weight: 750;
+}
+
+.apiExample pre {
+  margin: 0;
+  padding: 20px clamp(13px, 2.4vw, 25px);
+  border: 0;
+  background: transparent;
+  font-size: 0.89rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.apiExample code {
+  color: #eaf4ef;
+}
+
+.architectureList {
+  margin: 0;
+}
+
+.architectureList div {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(0, 2.5fr);
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.architectureList div:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.architectureList dt {
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.previewCallout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(24px, 5vw, 54px);
+  border-radius: 16px;
+  background: #deeee5;
+}
+
+.previewCallout .homeButton {
+  flex-shrink: 0;
+}
+
+.homePage .siteFooter a {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .homePage .nav {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .homeHero,
+  .homeSplit,
+  .memorySteps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .homePage h1 {
+    font-size: clamp(2.65rem, 10vw, 4.5rem);
+  }
+
+  .homePage .nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-block: 12px;
+  }
+
+  .homePage .nav nav {
+    gap: 4px 14px;
+  }
+
+  .homePage .nav nav a:not(.btn) {
+    padding-block: 5px;
+  }
+
+  .homeActions .homeButton {
+    padding-inline: 11px;
+    font-size: 0.85rem;
+  }
+
+  .homeArtwork {
+    border-radius: 14px;
+  }
+
+  .previewCallout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.homePage) {
+    scroll-behavior: auto;
+  }
+}
