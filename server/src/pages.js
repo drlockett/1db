@@ -113,7 +113,7 @@ function cognitionGraphSection() {
 
 export function homePage() {
   const title = '1db | Agentic Memory';
-  const description = '1db is Agentic Memory for AI agents. Record decisions and events, preserve project context, and retrieve authorized memory across sessions and handoffs.';
+  const description = '1db is Agentic Memory, the memory foundation for persistent intelligence. Give AI agents durable memory across sessions, systems, and time.';
   const heroImage = '/assets/agentic-memory-hero.jpg';
   const canonical = 'https://1db.io/';
   const imageAlt = 'Layers of smoked glass connected by mint traces, illustrating memory carried across sessions.';
@@ -130,8 +130,8 @@ ${nav()}
     <div class="heroCopy">
       <p class="homeEyebrow">Private preview</p>
       <h1 id="home-title">Agentic Memory<br>by 1db</h1>
-      <p class="heroLead">Give AI agents the ability to remember!</p>
-      <p class="heroDetail">1db captures decisions, events, and project knowledge, then retrieves the context an agent is authorized to use in its next session or handoff.</p>
+      <p class="heroLead">The memory foundation for persistent intelligence.</p>
+      <p class="heroDetail">1db gives AI agents durable memory across sessions, systems, and time. Preserve knowledge, identity, and relationships so experience can inform future decisions and actions.</p>
       <div class="homeActions">
         <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
         <a class="homeButton secondary" href="/docs">Read developer docs</a>
