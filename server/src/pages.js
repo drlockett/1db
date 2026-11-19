@@ -141,17 +141,24 @@ ${nav()}
 <main id="main-content">
   <section class="homeHero" aria-labelledby="home-title">
     <div class="heroCopy">
-      <p class="homeEyebrow">Private preview</p>
-      <h1 id="home-title">Agentic Memory<br>by 1db</h1>
-      <p class="heroLead">The memory foundation for persistent intelligence.</p>
-      <p class="heroDetail">1db gives AI agents durable memory across sessions, systems, and time. Preserve knowledge, identity, and relationships so experience can inform future decisions and actions.</p>
-      <div class="homeActions">
-        <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
-        <a class="homeButton secondary" href="/docs">Read developer docs</a>
+      <div class="heroHeading">
+        <p class="homeEyebrow">Private preview</p>
+        <h1 id="home-title">Agentic Memory<br>by 1db</h1>
+      </div>
+      <div class="heroSummary">
+        <p class="heroLead">The memory foundation for persistent intelligence.</p>
+        <p class="heroDetail">1db gives AI agents durable memory across sessions, systems, and time. Preserve knowledge, identity, and relationships so experience can inform future decisions and actions.</p>
+        <div class="homeActions">
+          <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
+          <a class="homeButton secondary" href="/docs">Read developer docs</a>
+        </div>
       </div>
     </div>
     <figure class="homeArtwork">
-      <img src="${heroImage}" width="1448" height="1086" alt="${esc(imageAlt)}" fetchpriority="high">
+      <a href="${heroImage}" target="_blank" rel="noopener" aria-label="Open the full-size Agentic Memory diagram in a new tab">
+        <img src="${heroImage}" width="1448" height="1086" alt="${esc(imageAlt)}" fetchpriority="high">
+      </a>
+      <figcaption><a class="homeLink" href="${heroImage}" target="_blank" rel="noopener">View full-size diagram <span aria-hidden="true">↗</span></a></figcaption>
     </figure>
   </section>
 

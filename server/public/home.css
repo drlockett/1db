@@ -75,10 +75,15 @@
 
 .homeHero {
   display: grid;
+  gap: 36px;
+  padding-block: clamp(40px, 6vw, 72px);
+}
+
+.heroCopy {
+  display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   align-items: center;
   gap: clamp(28px, 5vw, 72px);
-  padding-block: clamp(40px, 7vw, 98px);
 }
 
 .homeEyebrow {
@@ -141,6 +146,17 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+.homeArtwork figcaption {
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.homeArtwork figcaption .homeLink {
+  margin: 0;
+  font-size: 0.85rem;
 }
 
 .homeActions {
@@ -328,7 +344,7 @@
 }
 
 @media (max-width: 760px) {
-  .homeHero,
+  .heroCopy,
   .homeSplit,
   .memorySteps {
     grid-template-columns: minmax(0, 1fr);
