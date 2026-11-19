@@ -130,7 +130,7 @@ ${nav()}
     <div class="heroCopy">
       <p class="homeEyebrow">Private preview</p>
       <h1 id="home-title">Agentic Memory<br>by 1db</h1>
-      <p class="heroLead">Give AI agents the context to pick up where work left off.</p>
+      <p class="heroLead">Give AI agents the ability to remember!</p>
       <p class="heroDetail">1db captures decisions, events, and project knowledge, then retrieves the context an agent is authorized to use in its next session or handoff.</p>
       <div class="homeActions">
         <a class="homeButton" href="/waitlist">Join the waitlist <span aria-hidden="true">↗</span></a>
