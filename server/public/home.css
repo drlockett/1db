@@ -75,15 +75,48 @@
 
 .homeHero {
   display: grid;
-  gap: 36px;
-  padding-block: clamp(40px, 6vw, 72px);
+  gap: 32px;
+  padding-block: clamp(32px, 4vw, 52px);
 }
 
 .heroCopy {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  align-items: center;
-  gap: clamp(28px, 5vw, 72px);
+  max-width: 800px;
+  justify-self: center;
+  text-align: center;
+}
+
+.homePage .heroCopy h1 {
+  max-width: none;
+  margin-bottom: 18px;
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.heroAttribution {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.45em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.heroSummary .heroLead {
+  max-width: none;
+  margin: 0 auto 12px;
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+}
+
+.heroSummary .heroDetail {
+  max-width: 68ch;
+  margin-inline: auto;
+}
+
+.heroSummary .homeActions {
+  justify-content: center;
+  margin-top: 22px;
 }
 
 .homeEyebrow {
@@ -135,6 +168,9 @@
 }
 
 .homeArtwork {
+  width: 100%;
+  max-width: 960px;
+  justify-self: center;
   margin: 0;
   overflow: hidden;
   border-radius: 20px;
@@ -344,7 +380,6 @@
 }
 
 @media (max-width: 760px) {
-  .heroCopy,
   .homeSplit,
   .memorySteps {
     grid-template-columns: minmax(0, 1fr);
@@ -669,6 +704,16 @@
 }
 
 @media (max-width: 560px) {
+  .homePage .heroCopy h1 {
+    font-size: clamp(1.8rem, 8vw, 2.25rem);
+  }
+
+  .heroAttribution {
+    display: block;
+    margin: 8px 0 0;
+    font-size: 0.5em;
+  }
+
   .memoryLayerCards {
     grid-template-columns: minmax(0, 1fr);
     padding-inline: 20px;

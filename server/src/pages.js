@@ -143,7 +143,7 @@ ${nav()}
     <div class="heroCopy">
       <div class="heroHeading">
         <p class="homeEyebrow">Private preview</p>
-        <h1 id="home-title">Agentic Memory<br>by 1db</h1>
+        <h1 id="home-title">Agentic Memory <span class="heroAttribution">by 1db</span></h1>
       </div>
       <div class="heroSummary">
         <p class="heroLead">The memory foundation for persistent intelligence.</p>
